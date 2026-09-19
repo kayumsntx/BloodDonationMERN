@@ -172,7 +172,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) - Cloud database
 - [Socket.io](https://socket.io/) - Real-time communication
