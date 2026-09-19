@@ -14,7 +14,7 @@ const connectDB = require('./config/db');
 dotenv.config();
 
 // Connect Database
-// connectDB();
+connectDB();
 
 // Middleware
 app.use(cors());
