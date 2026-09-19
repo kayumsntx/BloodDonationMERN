@@ -1,81 +1,93 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const userSchema = new mongoose.Schema({
-    name:{
+const UserSchema = new mongoose.Schema({
+    name: {
         type: String,
         required: true
-
     },
-    email:{
+    email: {
         type: String,
         required: true,
         unique: true
     },
-    gender: {
+    password: {
         type: String,
-        enum:['Male', 'Female','Other'],
         required: true
     },
-    age:{
+    gender: {
+        type: String,
+        enum: ['Male', 'Female', 'Other'],
+        required: true
+    },
+    age: {
         type: Number,
         required: true,
         min: 18
-
     },
-    bloodGroup:{
-        enum:['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+    bloodGroup: {
+        type: String,
+        enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
         required: true
     },
-    phoneNumber:{
-        type: String,
-        required: true,
-    },
-    district:{
+    phoneNumber: {
         type: String,
         required: true
     },
-    address: String,
-    lastDonationDate:{
-        type: Date,
-        default: null  
+    district: {
+        type: String,
+        required: true
     },
-    isDonorAvailable:{
-        type: Boolean,
-        default: false
-    },
-    totalDonations:{
-        type: Number,
-        default: 0
-    },
-    profilePic:{
+    address: {
         type: String,
         default: ''
     },
-    IsOnline:{
+    lastDonationDate: {
+        type: Date,
+        default: null
+    },
+    isDonorAvailable: {
         type: Boolean,
         default: false
     },
-    lastActive:{
+    totalDonations: {
+        type: Number,
+        default: 0
+    },
+    profilePic: {
+        type: String,
+        default: ''
+    },
+    isOnline: {
+        type: Boolean,
+        default: false
+    },
+    lastActive: {
         type: Date,
         default: Date.now
     },
-    resetPasswordToken: String,
-    resetPasswordExpire: Date
+    resetPasswordToken: {
+        type: String
+    },
+    resetPasswordExpire: {
+        type: Date
+    }
 }, {
-    timestamps: tru
+    timestamps: true
 });
 
-UserSchema.pre('save',async function(next){
-    if(!this.isModified('password')){
+// Encrypt password before saving
+UserSchema.pre('save', async function(next) {
+    if (!this.isModified('password')) {
         next();
-    }   
+    }
     const salt = await bcrypt.genSalt(10);
-    this.password=await bcrypt.hash(this.password, salt);
+    this.password = await bcrypt.hash(this.password, salt);
 });
 
-UserSchema.methods.matchPassword=async function(enteredPassword){
+// Match password method
+UserSchema.methods.matchPassword = async function(enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
-
 };
-module.exports=mongoose.model('User',UserSchema);
+
+module.exports = mongoose.model('User', UserSchema);
