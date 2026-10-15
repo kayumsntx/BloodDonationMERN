@@ -28,6 +28,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/requests', require('./routes/requests'));
 app.use('/api/messages', require('./routes/messages').router);
+app.use('/api/donations', require('./routes/donations'));
 
 // Socket Handler
 require('./socket/socketHandler')(io);

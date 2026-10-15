@@ -58,11 +58,18 @@ module.exports = (io) => {
         });
 
         socket.on('typing', (data) => {
-            const { to, isTyping } = data;
-            socket.broadcast.to(to).emit('user-typing', {
-                from: socket.userId,
-                isTyping
-            });
+            const { to, isTyping } = data || {};
+            if (to) {
+                socket.broadcast.to(to).emit('user-typing', {
+                    from: socket.userId,
+                    isTyping
+                });
+            } else {
+                socket.broadcast.emit('user-typing', {
+                    from: socket.userId,
+                    isTyping
+                });
+            }
         });
 
         socket.on('disconnect', async () => {

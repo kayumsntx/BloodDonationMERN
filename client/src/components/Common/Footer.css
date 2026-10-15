@@ -1,0 +1,129 @@
+.site-footer {
+    margin-top: 40px;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    padding: 24px 28px 16px;
+    color: #4b5563;
+}
+
+.footer-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.footer-left {
+    max-width: 360px;
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.footer-brand .brand-icon {
+    font-size: 1.3rem;
+}
+
+.footer-brand .brand-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.footer-desc {
+    font-size: 0.85rem;
+    color: #6b7280;
+    line-height: 1.45;
+    margin: 0;
+}
+
+.footer-divider {
+    display: none;
+}
+
+.footer-dev-card {
+    background: linear-gradient(135deg, #fef2f2 0%, #fff1f2 100%);
+    border: 1px solid #fecdd3;
+    border-radius: 12px;
+    padding: 12px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 270px;
+}
+
+.dev-tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #dc2626;
+}
+
+.dev-name {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #991b1b;
+}
+
+.dev-details {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 4px;
+}
+
+.dev-item {
+    font-size: 0.82rem;
+    color: #4b5563;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
+
+.dev-item .item-icon {
+    font-size: 0.9rem;
+}
+
+.footer-copyright {
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px solid #f3f4f6;
+    text-align: center;
+    font-size: 0.78rem;
+    color: #9ca3af;
+}
+
+.footer-copyright p {
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .site-footer {
+        padding: 20px 16px 14px;
+        margin-top: 30px;
+    }
+
+    .footer-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .footer-left {
+        max-width: 100%;
+    }
+
+    .footer-dev-card {
+        min-width: unset;
+        width: 100%;
+    }
+}

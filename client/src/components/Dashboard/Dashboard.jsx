@@ -1,0 +1,65 @@
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { useSocket } from '../../context/SocketContext';
+import Sidebar from './Sidebar';
+import Feed from '../Posts/Feed';
+import DonorList from '../Donors/DonorList';
+import ChatArea from '../Chat/ChatArea';
+import Profile from '../Profile/Profile';
+import Footer from '../Common/Footer';
+import VerifyEmailBanner from '../Common/VerifyEmailBanner';
+import './Dashboard.css';
+
+const Dashboard = () => {
+    const { logout } = useAuth();
+    const socket = useSocket();
+    const navigate = useNavigate();
+    const [onlineUsers, setOnlineUsers] = useState([]);
+    const [notifications, setNotifications] = useState([]);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('online-users', (users) => setOnlineUsers(users));
+
+        socket.on('new-request', (req) => {
+            setNotifications(prev => [{ id: Date.now(), ...req }, ...prev]);
+        });
+
+        return () => {
+            socket.off('online-users');
+            socket.off('new-request');
+        };
+    }, [socket]);
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
+
+    return (
+        <div className="dashboard">
+            <Sidebar
+                onLogout={handleLogout}
+                onlineCount={onlineUsers.length}
+                notificationCount={notifications.length}
+            />
+            <div className="main-content">
+                <VerifyEmailBanner />
+                <div className="content-body">
+                    <Routes>
+                        <Route path="/" element={<Navigate to="feed" />} />
+                        <Route path="feed" element={<Feed />} />
+                        <Route path="donors" element={<DonorList />} />
+                        <Route path="chat" element={<ChatArea />} />
+                        <Route path="profile" element={<Profile />} />
+                    </Routes>
+                </div>
+                <Footer />
+            </div>
+        </div>
+    );
+};
+
+export default Dashboard;

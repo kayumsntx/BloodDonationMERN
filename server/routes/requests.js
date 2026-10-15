@@ -16,8 +16,15 @@ router.post('/', protect, async (req, res) => {
             hospital,
             district,
             urgency,
-            description
+            description,
+            status: 'Open'
         });
+
+        const io = req.app.get('io');
+        if (io) {
+            const populated = await request.populate('requester', 'name profilePic phoneNumber');
+            io.emit('new-request', populated);
+        }
 
         res.status(201).json(request);
     } catch (error) {
@@ -85,24 +92,59 @@ router.put('/:id', protect, async (req, res) => {
             return res.status(404).json({ message: 'Request not found' });
         }
 
-        if (request.requester.toString() !== req.user._id.toString()) {
+        const isRequester = request.requester.toString() === req.user._id.toString();
+        const isVolunteeringDonor = donor && donor.toString() === req.user._id.toString();
+
+        if (!isRequester && !isVolunteeringDonor) {
             return res.status(403).json({ message: 'Not authorized' });
         }
 
-        request.status = status || request.status;
-        if (donor) request.donor = donor;
+        if (status && isRequester) {
+            request.status = status;
+        }
+        if (donor) {
+            request.donor = donor;
+        }
 
-        // If fulfilled, update donor's donation count
-        if (status === 'Fulfilled' && donor) {
-            const donorUser = await User.findById(donor);
-            donorUser.totalDonations += 1;
-            donorUser.lastDonationDate = new Date();
-            await donorUser.save();
+        // 🆕 Auto-create donation record when fulfilled
+        if (status === 'Fulfilled' && (donor || request.donor)) {
+            const Donation = require('../models/Donation');
+            const donorId = donor || request.donor;
+
+            // Check if donation already exists for this request
+            const existing = await Donation.findOne({ request: request._id });
+            if (!existing) {
+                await Donation.create({
+                    donor: donorId,
+                    recipient: request.requester,
+                    request: request._id,
+                    bloodGroup: request.bloodGroup,
+                    hospital: request.hospital,
+                    district: request.district,
+                    units: request.quantity || 1
+                });
+
+                // Update donor's stats
+                const donorUser = await User.findById(donorId);
+                if (donorUser) {
+                    donorUser.totalDonations += 1;
+                    donorUser.lastDonationDate = new Date();
+                    donorUser.setNextEligibleDate();
+                    donorUser.updateBadge();
+                    await donorUser.save();
+                }
+            }
         }
 
         await request.save();
-        res.json(request);
+
+        const populated = await BloodRequest.findById(request._id)
+            .populate('requester', 'name profilePic phoneNumber bloodGroup')
+            .populate('donor', 'name profilePic phoneNumber bloodGroup');
+
+        res.json(populated || request);
     } catch (error) {
+        console.error('Update request error:', error);
         res.status(500).json({ message: error.message });
     }
 });
