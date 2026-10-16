@@ -9,6 +9,7 @@ import ChatArea from '../Chat/ChatArea';
 import Profile from '../Profile/Profile';
 import Footer from '../Common/Footer';
 import VerifyEmailBanner from '../Common/VerifyEmailBanner';
+import DonationReminder from './DonationReminder';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -47,6 +48,7 @@ const Dashboard = () => {
             />
             <div className="main-content">
                 <VerifyEmailBanner />
+                <DonationReminder />
                 <div className="content-body">
                     <Routes>
                         <Route path="/" element={<Navigate to="feed" />} />

@@ -4,15 +4,28 @@ const Donation = require('../models/Donation');
 const User = require('../models/User');
 const BloodRequest = require('../models/BloodRequest');
 const { protect } = require('../middleware/auth');
+const { checkEligibility } = require('../utils/eligibility');
 
-// ========== Create a Donation Record ==========
+// ========== Create a Donation Record (with eligibility check) ==========
 // POST /api/donations
 router.post('/', protect, async (req, res) => {
     try {
-        const { recipient, request, bloodGroup, hospital, district, units, notes } = req.body;
+        const { recipient, request, bloodGroup, hospital, district, units, notes, overrideEligibility } = req.body;
 
         if (!bloodGroup || !hospital || !district) {
             return res.status(400).json({ message: 'Blood group, hospital, and district are required' });
+        }
+
+        // Check eligibility
+        const user = await User.findById(req.user._id);
+        const eligibility = checkEligibility(user);
+
+        if (!eligibility.eligible && !overrideEligibility) {
+            return res.status(400).json({
+                message: eligibility.reason,
+                eligibility,
+                canOverride: true
+            });
         }
 
         // Create donation
@@ -27,13 +40,12 @@ router.post('/', protect, async (req, res) => {
             notes: notes || ''
         });
 
-        // Update donor's total donations & badge
-        const donor = await User.findById(req.user._id);
-        donor.totalDonations += 1;
-        donor.lastDonationDate = new Date();
-        donor.setNextEligibleDate();
-        donor.updateBadge();
-        await donor.save();
+        // Update donor's stats
+        user.totalDonations += 1;
+        user.lastDonationDate = new Date();
+        user.setNextEligibleDate();
+        user.updateBadge();
+        await user.save();
 
         // If a blood request is linked, mark it as fulfilled
         if (request) {
@@ -45,8 +57,15 @@ router.post('/', protect, async (req, res) => {
             }
         }
 
+        // Get updated eligibility
+        const newEligibility = checkEligibility(user);
+
         await donation.populate('donor recipient', 'name profilePic bloodGroup');
-        res.status(201).json(donation);
+        res.status(201).json({
+            donation,
+            nextEligibleDate: newEligibility.nextEligibleDate,
+            daysRemaining: newEligibility.daysRemaining
+        });
     } catch (error) {
         console.error('Create donation error:', error);
         res.status(500).json({ message: error.message });

@@ -97,8 +97,14 @@ const Login = () => {
 
             <footer className="auth-footer-credit">
                 <span className="dev-credit-title">Developed By</span>
-                <span className="dev-credit-name">ASMA Computer and IT Solutions</span>
-                <span className="dev-credit-info">Savar, Dhaka-1344 • +88 xxxxxxxxxxxxxx</span>
+                <a
+                    href="https://www.facebook.com/asmatechsolutions"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="dev-credit-name"
+                >
+                    ASMA Computer and IT Solutions
+                </a>
             </footer>
         </div>
     );

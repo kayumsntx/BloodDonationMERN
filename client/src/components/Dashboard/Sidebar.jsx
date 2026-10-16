@@ -75,9 +75,16 @@ const Sidebar = ({ onLogout, onlineCount, notificationCount }) => {
                     <div style={{ color: '#f87171', fontWeight: 600, fontSize: '0.85em', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                         Developed By
                     </div>
-                    <div style={{ fontWeight: 600, color: '#f1f5f9' }}>ASMA Computer & IT Solutions</div>
-                    <div>Savar, Dhaka-1344</div>
-                    <div style={{ color: '#cbd5e1' }}>+88 xxxxxxxxxxxxxx</div>
+                    <a
+                        href="https://www.facebook.com/asmatechsolutions"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontWeight: 600, color: '#f1f5f9', textDecoration: 'none', display: 'inline-block' }}
+                        onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+                        onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+                    >
+                        ASMA Computer and IT Solutions
+                    </a>
                 </div>
             </div>
         </div>

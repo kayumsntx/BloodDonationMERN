@@ -19,15 +19,14 @@ const Footer = () => {
 
                 <div className="footer-dev-card">
                     <span className="dev-tag">Developed By</span>
-                    <h4 className="dev-name">ASMA Computer and IT Solutions</h4>
-                    <div className="dev-details">
-                        <span className="dev-item">
-                            <span className="item-icon">📍</span> Savar, Dhaka-1344
-                        </span>
-                        <span className="dev-item">
-                            <span className="item-icon">📞</span> +88 xxxxxxxxxxxxxx
-                        </span>
-                    </div>
+                    <a
+                        href="https://www.facebook.com/asmatechsolutions"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="dev-name-link"
+                    >
+                        <h4 className="dev-name">ASMA Computer and IT Solutions</h4>
+                    </a>
                 </div>
             </div>
 

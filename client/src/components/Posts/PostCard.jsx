@@ -26,6 +26,21 @@ const PostCard = ({ request, onHelp }) => {
             return;
         }
 
+        // 🆕 Check eligibility first
+        try {
+            const { data: eligibility } = await api.get('/users/eligibility');
+            
+            if (!eligibility.eligible) {
+                toast.error(
+                    `You can donate in ${eligibility.daysRemaining} day(s). ${eligibility.reason}`,
+                    { duration: 5000, icon: '⏳' }
+                );
+                return;
+            }
+        } catch (error) {
+            console.error('Eligibility check failed:', error);
+        }
+
         try {
             // Mark self as donor
             await api.put(`/requests/${request._id}`, {

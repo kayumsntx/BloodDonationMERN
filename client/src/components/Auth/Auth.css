@@ -140,11 +140,14 @@
     font-weight: 700;
     color: #1f2937;
     font-size: 0.95rem;
+    text-decoration: none;
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+    display: inline-block;
 }
 
-.auth-footer-credit .dev-credit-info {
-    font-size: 0.8rem;
-    color: #6b7280;
+.auth-footer-credit .dev-credit-name:hover {
+    color: #dc2626;
+    text-decoration: underline;
 }
 
 /* Day 2 Additions */

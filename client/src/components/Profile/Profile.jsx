@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import DonationHistory from './DonationHistory';
+import EligibilityCard from './EligibilityCard';
 import './Profile.css';
 
 const Profile = () => {
@@ -143,6 +144,9 @@ const Profile = () => {
                 {/* Tab Content */}
                 {activeTab === 'info' && (
                     <>
+                        {/* 🆕 Eligibility Card */}
+                        <EligibilityCard />
+
                         <div className="profile-info-grid">
                             <InfoItem label="Email" value={user?.email} />
                             <InfoItem label="Phone" value={user?.phoneNumber} />

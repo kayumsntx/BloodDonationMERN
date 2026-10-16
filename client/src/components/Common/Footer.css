@@ -67,11 +67,22 @@
     color: #dc2626;
 }
 
+.dev-name-link {
+    text-decoration: none;
+    display: inline-block;
+}
+
 .dev-name {
     margin: 0;
     font-size: 0.95rem;
     font-weight: 700;
     color: #991b1b;
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.dev-name-link:hover .dev-name {
+    color: #dc2626;
+    text-decoration: underline;
 }
 
 .dev-details {
