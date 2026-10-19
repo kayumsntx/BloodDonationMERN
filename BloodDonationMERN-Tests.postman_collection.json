@@ -1,0 +1,153 @@
+{
+    "info": {
+        "name": "Blood Donation MERN - API Tests",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        { "key": "baseUrl", "value": "http://localhost:5000/api" },
+        { "key": "token", "value": "" },
+        { "key": "userId", "value": "" }
+    ],
+    "item": [
+        {
+            "name": "1. Health Check",
+            "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/health"
+            }
+        },
+        {
+            "name": "2. Register",
+            "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{baseUrl}}/auth/register",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"123456\",\n  \"gender\": \"Male\",\n  \"age\": 25,\n  \"bloodGroup\": \"O+\",\n  \"phoneNumber\": \"01700000000\",\n  \"district\": \"Dhaka\"\n}"
+                }
+            }
+        },
+        {
+            "name": "3. Login",
+            "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{baseUrl}}/auth/login",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"123456\"\n}"
+                }
+            }
+        },
+        {
+            "name": "4. Get Me",
+            "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/auth/me"
+            }
+        },
+        {
+            "name": "5. Get Eligibility",
+            "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/users/eligibility"
+            }
+        },
+        {
+            "name": "6. Get My Badges",
+            "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/badges/my"
+            }
+        },
+        {
+            "name": "7. Get All-Time Leaderboard",
+            "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/leaderboard/all-time"
+            }
+        },
+        {
+            "name": "8. Create Blood Request",
+            "request": {
+                "method": "POST",
+                "header": [
+                    { "key": "Content-Type", "value": "application/json" },
+                    { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": "{{baseUrl}}/requests",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"bloodGroup\": \"O+\",\n  \"quantity\": 2,\n  \"hospital\": \"Dhaka Medical\",\n  \"district\": \"Dhaka\",\n  \"urgency\": \"Emergency\",\n  \"description\": \"Critical patient\"\n}"
+                }
+            }
+        },
+        {
+            "name": "9. Create Donation",
+            "request": {
+                "method": "POST",
+                "header": [
+                    { "key": "Content-Type", "value": "application/json" },
+                    { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": "{{baseUrl}}/donations",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"bloodGroup\": \"O+\",\n  \"hospital\": \"Dhaka Medical\",\n  \"district\": \"Dhaka\",\n  \"units\": 1,\n  \"overrideEligibility\": true\n}"
+                }
+            }
+        },
+        {
+            "name": "10. Get My Donations",
+            "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/donations/my"
+            }
+        },
+        {
+            "name": "11. Get Donation Stats",
+            "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/donations/stats"
+            }
+        },
+        {
+            "name": "12. Send SOS Alert",
+            "request": {
+                "method": "POST",
+                "header": [
+                    { "key": "Content-Type", "value": "application/json" },
+                    { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "url": "{{baseUrl}}/sos",
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"bloodGroup\": \"O+\",\n  \"hospital\": \"Dhaka Medical\",\n  \"district\": \"Dhaka\",\n  \"contactNumber\": \"01700000000\",\n  \"units\": 2,\n  \"message\": \"Emergency!\"\n}"
+                }
+            }
+        },
+        {
+            "name": "13. Get Active SOS",
+            "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/sos/active"
+            }
+        },
+        {
+            "name": "14. Search Donors",
+            "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{baseUrl}}/users/donors/search?bloodGroup=O%2B&eligibleOnly=true"
+            }
+        }
+    ]
+}

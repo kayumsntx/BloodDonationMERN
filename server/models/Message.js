@@ -18,6 +18,14 @@ const MessageSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    audio: {
+        type: String,
+        default: ''
+    },
+    audioDuration: {
+        type: Number,
+        default: 0
+    },
     isGif: {
         type: Boolean,
         default: false

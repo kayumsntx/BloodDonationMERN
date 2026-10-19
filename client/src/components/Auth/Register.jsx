@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import DevCredit from '../Common/DevCredit';
 import './Auth.css';
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
 const Register = () => {
+    const { user, register } = useAuth();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -17,8 +19,11 @@ const Register = () => {
         district: ''
     });
     const [loading, setLoading] = useState(false);
-    const { register } = useAuth();
     const navigate = useNavigate();
+
+    if (user) {
+        return <Navigate to="/dashboard" replace />;
+    }
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -148,15 +153,7 @@ const Register = () => {
             </div>
 
             <footer className="auth-footer-credit">
-                <span className="dev-credit-title">Developed By</span>
-                <a
-                    href="https://www.facebook.com/asmatechsolutions"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="dev-credit-name"
-                >
-                    ASMA Computer and IT Solutions
-                </a>
+                <DevCredit variant="auth" />
             </footer>
         </div>
     );

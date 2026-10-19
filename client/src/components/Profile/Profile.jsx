@@ -4,6 +4,8 @@ import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import DonationHistory from './DonationHistory';
 import EligibilityCard from './EligibilityCard';
+import BadgeShowcase from '../Badges/BadgeShowcase';
+import NotificationSettings from './NotificationSettings';
 import './Profile.css';
 
 const Profile = () => {
@@ -139,9 +141,22 @@ const Profile = () => {
                         icon="📜"
                         label="Donation History"
                     />
+                    <TabButton
+                        active={activeTab === 'badges'}
+                        onClick={() => setActiveTab('badges')}
+                        icon="🏆"
+                        label="Badges"
+                    />
+                    <TabButton
+                        active={activeTab === 'notifications'}
+                        onClick={() => setActiveTab('notifications')}
+                        icon="🔔"
+                        label="Notifications"
+                    />
                 </div>
 
                 {/* Tab Content */}
+                {activeTab === 'notifications' && <NotificationSettings />}
                 {activeTab === 'info' && (
                     <>
                         {/* 🆕 Eligibility Card */}
@@ -198,6 +213,7 @@ const Profile = () => {
                 )}
 
                 {activeTab === 'history' && <DonationHistory />}
+                {activeTab === 'badges' && <BadgeShowcase />}
             </div>
         </div>
     );

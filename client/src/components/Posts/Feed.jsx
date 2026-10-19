@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import PostCard from './PostCard';
 import CreatePost from './CreatePost';
+import SOSActiveList from '../SOS/SOSActiveList';
 import './Posts.css';
 
 const BLOOD_GROUPS = ['All', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
@@ -69,6 +70,9 @@ const Feed = () => {
                     ➕ New Request
                 </button>
             </div>
+
+            {/* 🆕 SOS Active Alerts */}
+            <SOSActiveList />
 
             <div className="filters">
                 <select name="bloodGroup" value={filters.bloodGroup} onChange={handleFilterChange}>

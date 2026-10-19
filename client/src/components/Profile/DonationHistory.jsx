@@ -63,7 +63,8 @@ const DonationHistory = () => {
                     />
                     <StatCard
                         icon="🏆"
-                        value={stats.totalDonations >= 10 ? 'Gold' : 
+                        value={stats.totalDonations >= 25 ? 'Platinum' :
+                               stats.totalDonations >= 10 ? 'Gold' : 
                                stats.totalDonations >= 4 ? 'Silver' : 
                                stats.totalDonations >= 1 ? 'Bronze' : 'None'}
                         label="Current Badge"

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import DevCredit from '../Common/DevCredit';
 import './Auth.css';
 
 const ForgotPassword = () => {
@@ -48,15 +49,7 @@ const ForgotPassword = () => {
                 </div>
 
                 <footer className="auth-footer-credit">
-                    <span className="dev-credit-title">Developed By</span>
-                    <a
-                        href="https://www.facebook.com/asmatechsolutions"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="dev-credit-name"
-                    >
-                        ASMA Computer and IT Solutions
-                    </a>
+                    <DevCredit variant="auth" />
                 </footer>
             </div>
         );
@@ -98,15 +91,7 @@ const ForgotPassword = () => {
             </div>
 
             <footer className="auth-footer-credit">
-                <span className="dev-credit-title">Developed By</span>
-                <a
-                    href="https://www.facebook.com/asmatechsolutions"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="dev-credit-name"
-                >
-                    ASMA Computer and IT Solutions
-                </a>
+                <DevCredit variant="auth" />
             </footer>
         </div>
     );

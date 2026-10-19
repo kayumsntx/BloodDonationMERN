@@ -177,4 +177,87 @@ router.put('/profile-pic', protect, async (req, res) => {
     }
 });
 
+// Save FCM token
+router.post('/fcm-token', protect, async (req, res) => {
+    try {
+        const { fcmToken } = req.body;
+        await User.findByIdAndUpdate(req.user._id, { fcmToken });
+        res.json({ message: 'FCM token saved' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Get notification preferences
+router.get('/notification-settings', protect, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        res.json(user.notificationSettings || {
+            push: true, email: true, sms: false, whatsapp: false, digest: true, marketing: false
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Update notification preferences
+router.put('/notification-settings', protect, async (req, res) => {
+    try {
+        const { push, email, sms, whatsapp, digest, marketing } = req.body;
+        const user = await User.findById(req.user._id);
+        user.notificationSettings = {
+            ...user.notificationSettings,
+            ...(push !== undefined && { push }),
+            ...(email !== undefined && { email }),
+            ...(sms !== undefined && { sms }),
+            ...(whatsapp !== undefined && { whatsapp }),
+            ...(digest !== undefined && { digest }),
+            ...(marketing !== undefined && { marketing })
+        };
+        await user.save();
+        res.json(user.notificationSettings);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Update user GPS location (Day 15)
+router.put('/location', protect, async (req, res) => {
+    try {
+        const { longitude, latitude } = req.body;
+        await User.findByIdAndUpdate(req.user._id, {
+            location: { type: 'Point', coordinates: [parseFloat(longitude), parseFloat(latitude)] }
+        });
+        res.json({ message: 'Location updated' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Nearby donors (Day 17)
+router.get('/donors/nearby', protect, async (req, res) => {
+    try {
+        const { lng, lat, maxKm = 50, bloodGroup } = req.query;
+        if (!lng || !lat) {
+            return res.status(400).json({ message: 'Longitude and latitude are required' });
+        }
+        const filter = { isDonorAvailable: true, _id: { $ne: req.user._id } };
+        if (bloodGroup && bloodGroup !== 'All') filter.bloodGroup = bloodGroup;
+
+        const users = await User.find({
+            ...filter,
+            location: {
+                $near: {
+                    $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
+                    $maxDistance: parseFloat(maxKm) * 1000
+                }
+            }
+        }).limit(50).select('-password');
+
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 module.exports = router;

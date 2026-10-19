@@ -149,7 +149,7 @@ const UserSchema = new mongoose.Schema({
     },
     blockedReason: String,
 
-    // ========== Preferences ==========
+    // ========== Preferences & Notifications ==========
     language: {
         type: String,
         enum: ['bn', 'en'],
@@ -159,6 +159,31 @@ const UserSchema = new mongoose.Schema({
         type: String,
         enum: ['light', 'dark'],
         default: 'light'
+    },
+    fcmToken: {
+        type: String,
+        default: ''
+    },
+    notificationSettings: {
+        push: { type: Boolean, default: true },
+        email: { type: Boolean, default: true },
+        sms: { type: Boolean, default: false },
+        whatsapp: { type: Boolean, default: false },
+        digest: { type: Boolean, default: true },
+        marketing: { type: Boolean, default: false }
+    },
+    verification: {
+        isVerified: { type: Boolean, default: false },
+        type: { type: String, default: '' },
+        documentUrl: { type: String, default: '' },
+        submittedAt: Date,
+        verifiedAt: Date,
+        verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        rejectionReason: String
+    },
+    twoFactorSecret: {
+        type: String,
+        default: ''
     }
 }, {
     timestamps: true

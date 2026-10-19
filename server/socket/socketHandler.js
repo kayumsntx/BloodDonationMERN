@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Message = require('../models/Message');
+const GroupMessage = require('../models/GroupMessage');
 const { saveMessage } = require('../routes/messages');
 
 module.exports = (io) => {
@@ -7,7 +8,8 @@ module.exports = (io) => {
         console.log('🟢 New socket connected:', socket.id);
 
         socket.on('user-join', async (data) => {
-            const { userId } = data;
+            const { userId } = data || {};
+            if (!userId) return;
             socket.userId = userId;
 
             await User.findByIdAndUpdate(userId, {
@@ -28,12 +30,14 @@ module.exports = (io) => {
         });
 
         socket.on('chat-message', async (data) => {
-            const { text, image, isGif } = data;
+            const { text, image, isGif, audio, audioDuration } = data || {};
             const message = await saveMessage({
                 sender: socket.userId,
                 text,
                 image,
                 isGif,
+                audio,
+                audioDuration,
                 type: 'public'
             });
 
@@ -42,19 +46,23 @@ module.exports = (io) => {
         });
 
         socket.on('private-message', async (data) => {
-            const { toUserId, text, image, isGif } = data;
+            const { toUserId, text, image, isGif, audio, audioDuration } = data || {};
             const message = await saveMessage({
                 sender: socket.userId,
                 receiver: toUserId,
                 text,
                 image,
                 isGif,
+                audio,
+                audioDuration,
                 type: 'private'
             });
 
             const populated = await message.populate('sender receiver', 'name profilePic');
             io.to(socket.userId).emit('message', populated);
-            io.to(toUserId).emit('message', populated);
+            if (toUserId) {
+                io.to(toUserId).emit('message', populated);
+            }
         });
 
         socket.on('typing', (data) => {
@@ -70,6 +78,53 @@ module.exports = (io) => {
                     isTyping
                 });
             }
+        });
+
+        // ========== Group Chat Handlers (Day 13) ==========
+        socket.on('join-group', (groupId) => {
+            if (groupId) {
+                socket.join(`group:${groupId}`);
+            }
+        });
+
+        socket.on('group-message', async (data) => {
+            try {
+                const { groupId, text, image, audio, audioDuration } = data || {};
+                if (!groupId || (!text && !image && !audio)) return;
+
+                const msg = await GroupMessage.create({
+                    group: groupId,
+                    sender: socket.userId,
+                    text,
+                    image,
+                    audio,
+                    audioDuration
+                });
+                const populated = await msg.populate('sender', 'name profilePic');
+                io.to(`group:${groupId}`).emit('group-message', populated);
+            } catch (err) {
+                console.error('Group message error:', err.message);
+            }
+        });
+
+        // ========== SOS Alert Handlers ==========
+        socket.on('sos-respond', async (data) => {
+            const { sosId, requesterId, message } = data || {};
+            if (requesterId) {
+                io.to(requesterId).emit('sos-response', {
+                    sosId,
+                    donor: {
+                        _id: socket.userId,
+                        message: message || 'I can help!'
+                    },
+                    respondedAt: new Date()
+                });
+            }
+        });
+
+        socket.on('sos-cancel', async (data) => {
+            const { sosId } = data || {};
+            io.emit('sos-cancelled', { sosId });
         });
 
         socket.on('disconnect', async () => {

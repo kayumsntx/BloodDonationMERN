@@ -1,0 +1,182 @@
+.dev-credit-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.dev-credit-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #dc2626;
+}
+
+.dev-credit-company {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #991b1b;
+    text-decoration: none;
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+    display: inline-block;
+}
+
+.dev-credit-company:hover {
+    color: #dc2626;
+    text-decoration: underline;
+}
+
+.dev-credit-socials {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 3px;
+    flex-wrap: wrap;
+}
+
+.dev-social-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    line-height: 1.2;
+}
+
+.dev-social-btn svg {
+    flex-shrink: 0;
+}
+
+/* Auth Variant (centered, under authentication forms) */
+.dev-credit-auth {
+    align-items: center;
+    text-align: center;
+    margin-top: 4px;
+}
+
+.dev-credit-auth .dev-credit-company {
+    color: #1f2937;
+}
+
+.dev-credit-auth .dev-credit-company:hover {
+    color: #dc2626;
+}
+
+.dev-credit-auth .dev-credit-socials {
+    justify-content: center;
+}
+
+.dev-credit-auth .dev-social-btn {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+}
+
+.dev-credit-auth .dev-social-web:hover {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+    transform: translateY(-1px);
+}
+
+.dev-credit-auth .dev-social-linkedin:hover {
+    background: #0a66c2;
+    color: #ffffff;
+    border-color: #0a66c2;
+    transform: translateY(-1px);
+}
+
+.dev-credit-auth .dev-social-fb:hover {
+    background: #1877f2;
+    color: #ffffff;
+    border-color: #1877f2;
+    transform: translateY(-1px);
+}
+
+/* Sidebar Variant (dark sidebar in dashboard) */
+.dev-credit-sidebar {
+    align-items: center;
+    text-align: center;
+    border-top: 1px dashed #3d566e;
+    padding-top: 8px;
+}
+
+.dev-credit-sidebar .dev-credit-title {
+    color: #f87171;
+    font-size: 0.72rem;
+}
+
+.dev-credit-sidebar .dev-credit-company {
+    color: #f1f5f9;
+    font-size: 0.82rem;
+}
+
+.dev-credit-sidebar .dev-credit-company:hover {
+    color: #38bdf8;
+}
+
+.dev-credit-sidebar .dev-credit-socials {
+    justify-content: center;
+    gap: 5px;
+}
+
+.dev-credit-sidebar .dev-social-btn {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    padding: 3px 6px;
+    font-size: 0.68rem;
+}
+
+.dev-credit-sidebar .dev-social-web:hover {
+    background: rgba(56, 189, 248, 0.2);
+    color: #38bdf8;
+    border-color: #38bdf8;
+    transform: translateY(-1px);
+}
+
+.dev-credit-sidebar .dev-social-linkedin:hover {
+    background: #0a66c2;
+    color: #ffffff;
+    border-color: #0a66c2;
+    transform: translateY(-1px);
+}
+
+.dev-credit-sidebar .dev-social-fb:hover {
+    background: #1877f2;
+    color: #ffffff;
+    border-color: #1877f2;
+    transform: translateY(-1px);
+}
+
+/* Footer Variant (light card in dashboard footer) */
+.dev-credit-footer .dev-social-btn {
+    background: rgba(255, 255, 255, 0.9);
+    color: #4b5563;
+    border: 1px solid #fecdd3;
+}
+
+.dev-credit-footer .dev-social-web:hover {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+    transform: translateY(-1px);
+}
+
+.dev-credit-footer .dev-social-linkedin:hover {
+    background: #0a66c2;
+    color: #ffffff;
+    border-color: #0a66c2;
+    transform: translateY(-1px);
+}
+
+.dev-credit-footer .dev-social-fb:hover {
+    background: #1877f2;
+    color: #ffffff;
+    border-color: #1877f2;
+    transform: translateY(-1px);
+}

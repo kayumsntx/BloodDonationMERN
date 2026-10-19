@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
+import VoiceRecorder from './VoiceRecorder';
 import './Chat.css';
 
 const ChatArea = () => {
@@ -10,7 +11,14 @@ const ChatArea = () => {
     const [text, setText] = useState('');
     const [onlineUsers, setOnlineUsers] = useState([]);
     const [typingUsers, setTypingUsers] = useState({});
+    const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
     const messagesEndRef = useRef(null);
+
+    const handleVoiceRecorded = ({ audio, audioDuration }) => {
+        if (!socket) return;
+        socket.emit('chat-message', { audio, audioDuration, text: '🎤 Voice message' });
+        setShowVoiceRecorder(false);
+    };
 
     useEffect(() => {
         if (!socket) return;
@@ -18,7 +26,10 @@ const ChatArea = () => {
         socket.on('public-messages', (msgs) => setMessages(msgs));
         socket.on('message', (msg) => {
             if (msg.type === 'public') {
-                setMessages(prev => [...prev, msg]);
+                setMessages(prev => {
+                    if (prev.find(m => m._id === msg._id)) return prev;
+                    return [...prev, msg];
+                });
             }
         });
         socket.on('online-users', (users) => setOnlineUsers(users));
@@ -106,7 +117,12 @@ const ChatArea = () => {
                                 className={`chat-message ${isOwn ? 'own' : 'other'}`}
                             >
                                 {!isOwn && <div className="sender">{senderName}</div>}
-                                <div>{msg.text}</div>
+                                {msg.text && <div>{msg.text}</div>}
+                                {msg.audio && (
+                                    <div style={{ marginTop: 6 }}>
+                                        <audio controls src={msg.audio} style={{ maxWidth: '100%', height: 38 }} />
+                                    </div>
+                                )}
                                 <div className="time">{formatTime(msg.createdAt || Date.now())}</div>
                             </div>
                         );
@@ -120,7 +136,37 @@ const ChatArea = () => {
                     </div>
                 )}
 
+                {showVoiceRecorder && (
+                    <div style={{ padding: '0 20px' }}>
+                        <VoiceRecorder
+                            onRecorded={handleVoiceRecorded}
+                            onCancel={() => setShowVoiceRecorder(false)}
+                        />
+                    </div>
+                )}
+
                 <div className="chat-input-area">
+                    <button
+                        type="button"
+                        onClick={() => setShowVoiceRecorder(v => !v)}
+                        title="Voice message"
+                        style={{
+                            background: showVoiceRecorder ? '#dc2626' : '#f1f5f9',
+                            color: showVoiceRecorder ? 'white' : '#475569',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: 40,
+                            height: 40,
+                            cursor: 'pointer',
+                            fontSize: '1.1em',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        🎤
+                    </button>
                     <input
                         type="text"
                         value={text}

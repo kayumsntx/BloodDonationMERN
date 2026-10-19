@@ -6,10 +6,13 @@ import Sidebar from './Sidebar';
 import Feed from '../Posts/Feed';
 import DonorList from '../Donors/DonorList';
 import ChatArea from '../Chat/ChatArea';
+import GroupChat from '../Chat/GroupChat';
 import Profile from '../Profile/Profile';
 import Footer from '../Common/Footer';
 import VerifyEmailBanner from '../Common/VerifyEmailBanner';
 import DonationReminder from './DonationReminder';
+import Leaderboard from '../Leaderboard/Leaderboard';
+import SOSButton from '../SOS/SOSButton';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -55,11 +58,15 @@ const Dashboard = () => {
                         <Route path="feed" element={<Feed />} />
                         <Route path="donors" element={<DonorList />} />
                         <Route path="chat" element={<ChatArea />} />
+                        <Route path="groups" element={<GroupChat />} />
                         <Route path="profile" element={<Profile />} />
+                        <Route path="leaderboard" element={<Leaderboard />} />
                     </Routes>
                 </div>
                 <Footer />
             </div>
+            {/* 🆕 Floating SOS Button */}
+            <SOSButton />
         </div>
     );
 };

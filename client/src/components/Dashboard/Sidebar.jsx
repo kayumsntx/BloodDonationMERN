@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import DevCredit from '../Common/DevCredit';
 import './Dashboard.css';
 
 const Sidebar = ({ onLogout, onlineCount, notificationCount }) => {
@@ -48,6 +49,8 @@ const Sidebar = ({ onLogout, onlineCount, notificationCount }) => {
                     label="Chat"
                     badge={onlineCount > 0 ? onlineCount : null}
                 />
+                <SidebarLink to="/dashboard/groups" icon="🩸" label="Group Chats" />
+                <SidebarLink to="/dashboard/leaderboard" icon="🏆" label="Leaderboard" />
                 <SidebarLink to="/dashboard/profile" icon="👤" label="My Profile" />
             </nav>
 
@@ -64,27 +67,8 @@ const Sidebar = ({ onLogout, onlineCount, notificationCount }) => {
                 >
                     🚪 Logout
                 </button>
-                <div style={{
-                    textAlign: 'center',
-                    fontSize: '0.72em',
-                    color: '#94a3b8',
-                    lineHeight: 1.45,
-                    borderTop: '1px dashed #3d566e',
-                    paddingTop: 8
-                }}>
-                    <div style={{ color: '#f87171', fontWeight: 600, fontSize: '0.85em', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        Developed By
-                    </div>
-                    <a
-                        href="https://www.facebook.com/asmatechsolutions"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ fontWeight: 600, color: '#f1f5f9', textDecoration: 'none', display: 'inline-block' }}
-                        onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
-                        onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
-                    >
-                        ASMA Computer and IT Solutions
-                    </a>
+                <div style={{ marginTop: 12 }}>
+                    <DevCredit variant="sidebar" />
                 </div>
             </div>
         </div>

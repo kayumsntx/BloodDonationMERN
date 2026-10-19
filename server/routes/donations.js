@@ -5,6 +5,7 @@ const User = require('../models/User');
 const BloodRequest = require('../models/BloodRequest');
 const { protect } = require('../middleware/auth');
 const { checkEligibility } = require('../utils/eligibility');
+const { checkMilestone } = require('../utils/badges');
 
 // ========== Create a Donation Record (with eligibility check) ==========
 // POST /api/donations
@@ -57,14 +58,17 @@ router.post('/', protect, async (req, res) => {
             }
         }
 
-        // Get updated eligibility
         const newEligibility = checkEligibility(user);
+        const newMilestone = checkMilestone(user.totalDonations);
 
         await donation.populate('donor recipient', 'name profilePic bloodGroup');
         res.status(201).json({
             donation,
             nextEligibleDate: newEligibility.nextEligibleDate,
-            daysRemaining: newEligibility.daysRemaining
+            daysRemaining: newEligibility.daysRemaining,
+            totalDonations: user.totalDonations,
+            newBadge: user.badge,
+            milestone: newMilestone
         });
     } catch (error) {
         console.error('Create donation error:', error);

@@ -1,4 +1,5 @@
 import React from 'react';
+import DevCredit from './DevCredit';
 import './Footer.css';
 
 const Footer = () => {
@@ -18,15 +19,7 @@ const Footer = () => {
                 <div className="footer-divider" />
 
                 <div className="footer-dev-card">
-                    <span className="dev-tag">Developed By</span>
-                    <a
-                        href="https://www.facebook.com/asmatechsolutions"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="dev-name-link"
-                    >
-                        <h4 className="dev-name">ASMA Computer and IT Solutions</h4>
-                    </a>
+                    <DevCredit variant="footer" />
                 </div>
             </div>
 
