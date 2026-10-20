@@ -88,11 +88,110 @@
 }
 
 .chat-message {
+    position: relative;
     max-width: 70%;
     padding: 10px 15px;
     border-radius: 15px;
     font-size: 0.95em;
     word-wrap: break-word;
+}
+
+.chat-message .forwarded-badge {
+    font-size: 0.72em;
+    font-style: italic;
+    opacity: 0.85;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.chat-message .deleted-text {
+    font-style: italic;
+    opacity: 0.75;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.message-header-row {
+    display: flex;
+    align-items: center;
+    justifyContent: space-between;
+    gap: 8px;
+    margin-bottom: 2px;
+}
+
+.message-action-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95em;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 4px;
+    opacity: 0.65;
+    transition: opacity 0.2s, background 0.2s;
+}
+
+.chat-message.own .message-action-btn {
+    color: white;
+}
+
+.chat-message.other .message-action-btn {
+    color: #475569;
+}
+
+.message-action-btn:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.12);
+}
+
+.message-action-menu {
+    position: absolute;
+    top: 28px;
+    right: 8px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+    z-index: 100;
+    min-width: 175px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-message.other .message-action-menu {
+    left: 8px;
+    right: auto;
+}
+
+.action-menu-item {
+    background: transparent;
+    border: none;
+    padding: 9px 14px;
+    font-size: 0.82rem;
+    color: #334155;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.15s;
+    width: 100%;
+}
+
+.action-menu-item:hover {
+    background: #f1f5f9;
+}
+
+.action-menu-item.danger {
+    color: #dc2626;
+}
+
+.action-menu-item.danger:hover {
+    background: #fef2f2;
 }
 
 .chat-message.own {

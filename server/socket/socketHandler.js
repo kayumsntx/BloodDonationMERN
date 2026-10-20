@@ -107,6 +107,24 @@ module.exports = (io) => {
             }
         });
 
+        // ========== Delete Message Real-Time Handlers ==========
+        socket.on('delete-message', (data) => {
+            const { messageId, type, toUserId } = data || {};
+            if (type === 'private' && toUserId) {
+                io.to(toUserId).emit('message-deleted', { messageId, type: 'private' });
+                io.to(socket.userId).emit('message-deleted', { messageId, type: 'private' });
+            } else {
+                io.emit('message-deleted', { messageId, type: 'public' });
+            }
+        });
+
+        socket.on('delete-group-message', (data) => {
+            const { messageId, groupId } = data || {};
+            if (groupId) {
+                io.to(`group:${groupId}`).emit('group-message-deleted', { messageId, groupId });
+            }
+        });
+
         // ========== SOS Alert Handlers ==========
         socket.on('sos-respond', async (data) => {
             const { sosId, requesterId, message } = data || {};

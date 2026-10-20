@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import VoiceRecorder from './VoiceRecorder';
+import ForwardModal from './ForwardModal';
+import api from '../../utils/api';
+import toast from 'react-hot-toast';
 import './Chat.css';
 
 const ChatArea = () => {
@@ -12,6 +15,8 @@ const ChatArea = () => {
     const [onlineUsers, setOnlineUsers] = useState([]);
     const [typingUsers, setTypingUsers] = useState({});
     const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
+    const [activeMenuMsgId, setActiveMenuMsgId] = useState(null);
+    const [forwardingMsg, setForwardingMsg] = useState(null);
     const messagesEndRef = useRef(null);
 
     const handleVoiceRecorded = ({ audio, audioDuration }) => {
@@ -32,6 +37,20 @@ const ChatArea = () => {
                 });
             }
         });
+        socket.on('message-deleted', ({ messageId }) => {
+            setMessages(prev => prev.map(m => {
+                if (m._id === messageId) {
+                    return {
+                        ...m,
+                        isDeleted: true,
+                        text: '🚫 This message was deleted',
+                        audio: '',
+                        image: ''
+                    };
+                }
+                return m;
+            }));
+        });
         socket.on('online-users', (users) => setOnlineUsers(users));
         socket.on('user-typing', ({ from, isTyping }) => {
             setTypingUsers(prev => ({ ...prev, [from]: isTyping }));
@@ -40,6 +59,7 @@ const ChatArea = () => {
         return () => {
             socket.off('public-messages');
             socket.off('message');
+            socket.off('message-deleted');
             socket.off('online-users');
             socket.off('user-typing');
         };
@@ -48,6 +68,15 @@ const ChatArea = () => {
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    // Close action menu on click outside
+    useEffect(() => {
+        const handleClickOutside = () => setActiveMenuMsgId(null);
+        if (activeMenuMsgId) {
+            document.addEventListener('click', handleClickOutside);
+            return () => document.removeEventListener('click', handleClickOutside);
+        }
+    }, [activeMenuMsgId]);
 
     const handleSend = () => {
         if (!text.trim() || !socket) return;
@@ -63,6 +92,64 @@ const ChatArea = () => {
 
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') handleSend();
+    };
+
+    // Actions on messages: Copy, Forward, Delete for me, Delete for everyone
+    const handleCopy = (msg) => {
+        setActiveMenuMsgId(null);
+        if (msg.text) {
+            navigator.clipboard.writeText(msg.text);
+            toast.success('Message copied to clipboard! 📋');
+        } else {
+            toast.error('No text content to copy');
+        }
+    };
+
+    const handleOpenForward = (msg) => {
+        setActiveMenuMsgId(null);
+        setForwardingMsg(msg);
+    };
+
+    const handleDeleteForMe = async (msgId) => {
+        setActiveMenuMsgId(null);
+        try {
+            await api.put(`/messages/${msgId}/delete-for-me`);
+            setMessages(prev => prev.filter(m => m._id !== msgId));
+            toast.success('Message deleted for you');
+        } catch (error) {
+            console.error('Delete for me error:', error);
+            toast.error('Failed to delete message');
+        }
+    };
+
+    const handleDeleteForEveryone = async (msgId) => {
+        setActiveMenuMsgId(null);
+        if (!window.confirm('Are you sure you want to delete this message for everyone?')) {
+            return;
+        }
+
+        try {
+            await api.delete(`/messages/${msgId}`);
+            setMessages(prev => prev.map(m => {
+                if (m._id === msgId) {
+                    return {
+                        ...m,
+                        isDeleted: true,
+                        text: '🚫 This message was deleted',
+                        audio: '',
+                        image: ''
+                    };
+                }
+                return m;
+            }));
+            if (socket) {
+                socket.emit('delete-message', { messageId: msgId, type: 'public' });
+            }
+            toast.success('Message deleted for everyone');
+        } catch (error) {
+            console.error('Delete for everyone error:', error);
+            toast.error(error.response?.data?.message || 'Failed to delete for everyone');
+        }
     };
 
     const formatTime = (date) => {
@@ -108,21 +195,104 @@ const ChatArea = () => {
                     {messages.map((msg, idx) => {
                         const isOwn = msg.sender?._id === user?._id || msg.sender === user?._id;
                         const senderName = isOwn ? 'You' : msg.sender?.name || 'Unknown';
-                        const avatarUrl = msg.sender?.profilePic ||
-                            `https://ui-avatars.com/api/?name=${senderName}&background=dc3545&color=fff&size=40`;
+                        const isMenuOpen = activeMenuMsgId === msg._id;
+                        const canDeleteEveryone = (isOwn || user?.role === 'admin') && !msg.isDeleted;
 
                         return (
                             <div
-                                key={idx}
+                                key={msg._id || idx}
                                 className={`chat-message ${isOwn ? 'own' : 'other'}`}
                             >
-                                {!isOwn && <div className="sender">{senderName}</div>}
-                                {msg.text && <div>{msg.text}</div>}
-                                {msg.audio && (
-                                    <div style={{ marginTop: 6 }}>
-                                        <audio controls src={msg.audio} style={{ maxWidth: '100%', height: 38 }} />
+                                {/* Forwarded badge */}
+                                {msg.isForwarded && (
+                                    <div className="forwarded-badge">
+                                        <span>↗️</span>
+                                        <span>Forwarded</span>
                                     </div>
                                 )}
+
+                                {/* Sender & action menu trigger */}
+                                <div className="message-header-row">
+                                    {!isOwn && <div className="sender">{senderName}</div>}
+                                    <div style={{ marginLeft: 'auto' }}>
+                                        <button
+                                            type="button"
+                                            className="message-action-btn"
+                                            title="Message options"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setActiveMenuMsgId(isMenuOpen ? null : msg._id);
+                                            }}
+                                        >
+                                            ⋮
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Action dropdown menu */}
+                                {isMenuOpen && (
+                                    <div
+                                        className="message-action-menu"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        {!msg.isDeleted && msg.text && (
+                                            <button
+                                                type="button"
+                                                className="action-menu-item"
+                                                onClick={() => handleCopy(msg)}
+                                            >
+                                                <span>📋</span>
+                                                <span>Copy SMS</span>
+                                            </button>
+                                        )}
+                                        {!msg.isDeleted && (
+                                            <button
+                                                type="button"
+                                                className="action-menu-item"
+                                                onClick={() => handleOpenForward(msg)}
+                                            >
+                                                <span>↗️</span>
+                                                <span>Forward SMS</span>
+                                            </button>
+                                        )}
+                                        <button
+                                            type="button"
+                                            className="action-menu-item"
+                                            onClick={() => handleDeleteForMe(msg._id)}
+                                        >
+                                            <span>🗑️</span>
+                                            <span>Delete for me</span>
+                                        </button>
+                                        {canDeleteEveryone && (
+                                            <button
+                                                type="button"
+                                                className="action-menu-item danger"
+                                                onClick={() => handleDeleteForEveryone(msg._id)}
+                                            >
+                                                <span>💥</span>
+                                                <span>Delete for everyone</span>
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Message Content */}
+                                {msg.isDeleted ? (
+                                    <div className="deleted-text">
+                                        <span>🚫</span>
+                                        <span>This message was deleted</span>
+                                    </div>
+                                ) : (
+                                    <>
+                                        {msg.text && <div>{msg.text}</div>}
+                                        {msg.audio && (
+                                            <div style={{ marginTop: 6 }}>
+                                                <audio controls src={msg.audio} style={{ maxWidth: '100%', height: 38 }} />
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+
                                 <div className="time">{formatTime(msg.createdAt || Date.now())}</div>
                             </div>
                         );
@@ -178,6 +348,20 @@ const ChatArea = () => {
                     <button onClick={handleSend}>Send</button>
                 </div>
             </div>
+
+            {/* Forward SMS Modal */}
+            {forwardingMsg && (
+                <ForwardModal
+                    message={forwardingMsg}
+                    source="direct"
+                    onClose={() => setForwardingMsg(null)}
+                    onForwardSuccess={(type) => {
+                        if (type === 'public') {
+                            // Already broadcast via socket
+                        }
+                    }}
+                />
+            )}
         </div>
     );
 };

@@ -34,6 +34,18 @@ const MessageSchema = new mongoose.Schema({
         type: String,
         enum: ['public', 'private'],
         default: 'public'
+    },
+    deletedFor: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
+    isForwarded: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

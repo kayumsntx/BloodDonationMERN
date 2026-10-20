@@ -15,7 +15,19 @@ const GroupMessageSchema = new mongoose.Schema({
     image: String,
     audio: String,
     audioDuration: Number,
-    isGif: Boolean
+    isGif: Boolean,
+    deletedFor: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
+    isForwarded: {
+        type: Boolean,
+        default: false
+    }
 }, { timestamps: true });
 
 GroupMessageSchema.index({ group: 1, createdAt: -1 });

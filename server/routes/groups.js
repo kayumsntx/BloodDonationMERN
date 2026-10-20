@@ -66,12 +66,72 @@ router.post('/:id/join', protect, async (req, res) => {
 
 router.get('/:id/messages', protect, async (req, res) => {
     try {
-        const messages = await GroupMessage.find({ group: req.params.id })
+        const messages = await GroupMessage.find({
+            group: req.params.id,
+            deletedFor: { $ne: req.user._id }
+        })
             .sort({ createdAt: -1 })
             .limit(50)
             .populate('sender', 'name profilePic')
             .lean();
         res.json(messages.reverse());
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Delete group message for me
+router.put('/messages/:messageId/delete-for-me', protect, async (req, res) => {
+    try {
+        const message = await GroupMessage.findById(req.params.messageId);
+        if (!message) {
+            return res.status(404).json({ message: 'Message not found' });
+        }
+
+        await GroupMessage.findByIdAndUpdate(req.params.messageId, {
+            $addToSet: { deletedFor: req.user._id }
+        });
+
+        res.json({ success: true, messageId: req.params.messageId, action: 'deleteForMe' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Delete group message for everyone (author, group admin, or site admin)
+router.delete('/messages/:messageId', protect, async (req, res) => {
+    try {
+        const message = await GroupMessage.findById(req.params.messageId);
+        if (!message) {
+            return res.status(404).json({ message: 'Message not found' });
+        }
+
+        const group = await Group.findById(message.group);
+        const isSender = message.sender.toString() === req.user._id.toString();
+        const isGroupAdmin = group?.admins?.some(a => a.toString() === req.user._id.toString());
+        const isSiteAdmin = req.user.role === 'admin';
+
+        if (!isSender && !isGroupAdmin && !isSiteAdmin) {
+            return res.status(403).json({ message: 'Not authorized to delete this message for everyone' });
+        }
+
+        message.isDeleted = true;
+        message.text = '🚫 This message was deleted';
+        message.image = '';
+        message.audio = '';
+        message.audioDuration = 0;
+        await message.save();
+
+        const io = req.app.get('io');
+        if (io) {
+            io.to(`group:${message.group}`).emit('group-message-deleted', {
+                messageId: message._id,
+                groupId: message.group,
+                isDeletedForEveryone: true
+            });
+        }
+
+        res.json({ success: true, messageId: message._id, action: 'deleteForEveryone', message });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

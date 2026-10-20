@@ -3,6 +3,8 @@ import api from '../../utils/api';
 import { useSocket } from '../../context/SocketContext';
 import { useAuth } from '../../context/AuthContext';
 import VoiceRecorder from './VoiceRecorder';
+import ForwardModal from './ForwardModal';
+import toast from 'react-hot-toast';
 
 const GroupChat = () => {
     const { user } = useAuth();
@@ -13,6 +15,8 @@ const GroupChat = () => {
     const [text, setText] = useState('');
     const [loading, setLoading] = useState(true);
     const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
+    const [activeMenuMsgId, setActiveMenuMsgId] = useState(null);
+    const [forwardingMsg, setForwardingMsg] = useState(null);
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
@@ -54,15 +58,43 @@ const GroupChat = () => {
             }
         };
 
+        const deleteHandler = ({ messageId, groupId }) => {
+            if (groupId === activeGroup._id) {
+                setMessages(prev => prev.map(m => {
+                    if (m._id === messageId) {
+                        return {
+                            ...m,
+                            isDeleted: true,
+                            text: '🚫 This message was deleted',
+                            audio: '',
+                            image: ''
+                        };
+                    }
+                    return m;
+                }));
+            }
+        };
+
         socket.on('group-message', handler);
+        socket.on('group-message-deleted', deleteHandler);
         return () => {
             socket.off('group-message', handler);
+            socket.off('group-message-deleted', deleteHandler);
         };
     }, [socket, activeGroup]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    // Close action menu on click outside
+    useEffect(() => {
+        const handleClickOutside = () => setActiveMenuMsgId(null);
+        if (activeMenuMsgId) {
+            document.addEventListener('click', handleClickOutside);
+            return () => document.removeEventListener('click', handleClickOutside);
+        }
+    }, [activeMenuMsgId]);
 
     const sendMessage = () => {
         if (!text.trim() || !socket || !activeGroup) return;
@@ -79,6 +111,63 @@ const GroupChat = () => {
             text: '🎤 Voice note'
         });
         setShowVoiceRecorder(false);
+    };
+
+    const handleCopy = (msg) => {
+        setActiveMenuMsgId(null);
+        if (msg.text) {
+            navigator.clipboard.writeText(msg.text);
+            toast.success('Message copied to clipboard! 📋');
+        } else {
+            toast.error('No text content to copy');
+        }
+    };
+
+    const handleOpenForward = (msg) => {
+        setActiveMenuMsgId(null);
+        setForwardingMsg(msg);
+    };
+
+    const handleDeleteForMe = async (msgId) => {
+        setActiveMenuMsgId(null);
+        try {
+            await api.put(`/groups/messages/${msgId}/delete-for-me`);
+            setMessages(prev => prev.filter(m => m._id !== msgId));
+            toast.success('Message deleted for you');
+        } catch (error) {
+            console.error('Delete for me error:', error);
+            toast.error('Failed to delete message');
+        }
+    };
+
+    const handleDeleteForEveryone = async (msgId) => {
+        setActiveMenuMsgId(null);
+        if (!window.confirm('Are you sure you want to delete this message for everyone?')) {
+            return;
+        }
+
+        try {
+            await api.delete(`/groups/messages/${msgId}`);
+            setMessages(prev => prev.map(m => {
+                if (m._id === msgId) {
+                    return {
+                        ...m,
+                        isDeleted: true,
+                        text: '🚫 This message was deleted',
+                        audio: '',
+                        image: ''
+                    };
+                }
+                return m;
+            }));
+            if (socket) {
+                socket.emit('delete-group-message', { messageId: msgId, groupId: activeGroup._id });
+            }
+            toast.success('Message deleted for everyone');
+        } catch (error) {
+            console.error('Delete for everyone error:', error);
+            toast.error(error.response?.data?.message || 'Failed to delete for everyone');
+        }
     };
 
     const joinGroup = async (groupId) => {
@@ -265,6 +354,8 @@ const GroupChat = () => {
                                     const senderName = isOwn ? 'You' : m.sender?.name || 'Fellow Donor';
                                     const avatar = m.sender?.profilePic ||
                                         `https://ui-avatars.com/api/?name=${encodeURIComponent(senderName)}&background=dc3545&color=fff&size=40`;
+                                    const isMenuOpen = activeMenuMsgId === m._id;
+                                    const canDeleteEveryone = (isOwn || user?.role === 'admin') && !m.isDeleted;
 
                                     return (
                                         <div
@@ -273,7 +364,8 @@ const GroupChat = () => {
                                                 display: 'flex',
                                                 flexDirection: 'column',
                                                 alignItems: isOwn ? 'flex-end' : 'flex-start',
-                                                marginBottom: 14
+                                                marginBottom: 14,
+                                                position: 'relative'
                                             }}
                                         >
                                             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, maxWidth: '75%' }}>
@@ -285,24 +377,139 @@ const GroupChat = () => {
                                                     />
                                                 )}
                                                 <div style={{
+                                                    position: 'relative',
                                                     background: isOwn ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'white',
                                                     color: isOwn ? 'white' : '#1e293b',
                                                     padding: '10px 16px',
                                                     borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                                                     boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-                                                    border: isOwn ? 'none' : '1px solid #e2e8f0'
+                                                    border: isOwn ? 'none' : '1px solid #e2e8f0',
+                                                    minWidth: 140
                                                 }}>
-                                                    {!isOwn && (
-                                                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#dc2626', marginBottom: 4 }}>
-                                                            {senderName}
+                                                    {/* Forwarded tag */}
+                                                    {m.isForwarded && (
+                                                        <div style={{
+                                                            fontSize: '0.72rem',
+                                                            fontStyle: 'italic',
+                                                            opacity: 0.85,
+                                                            marginBottom: 4,
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: 4
+                                                        }}>
+                                                            <span>↗️</span>
+                                                            <span>Forwarded</span>
                                                         </div>
                                                     )}
-                                                    {m.text && <div style={{ fontSize: '0.92rem', wordBreak: 'break-word', lineHeight: 1.4 }}>{m.text}</div>}
-                                                    {m.audio && (
-                                                        <div style={{ marginTop: 6 }}>
-                                                            <audio controls src={m.audio} style={{ maxWidth: '100%', height: 36 }} />
+
+                                                    {/* Header with name and action trigger */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 2 }}>
+                                                        {!isOwn ? (
+                                                            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#dc2626' }}>
+                                                                {senderName}
+                                                            </div>
+                                                        ) : <div />}
+                                                        <button
+                                                            type="button"
+                                                            title="Message options"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setActiveMenuMsgId(isMenuOpen ? null : m._id);
+                                                            }}
+                                                            style={{
+                                                                background: 'transparent',
+                                                                border: 'none',
+                                                                cursor: 'pointer',
+                                                                color: isOwn ? 'white' : '#64748b',
+                                                                fontSize: '0.9rem',
+                                                                opacity: 0.7,
+                                                                lineHeight: 1,
+                                                                padding: '2px 4px'
+                                                            }}
+                                                        >
+                                                            ⋮
+                                                        </button>
+                                                    </div>
+
+                                                    {/* Dropdown menu */}
+                                                    {isMenuOpen && (
+                                                        <div
+                                                            className="message-action-menu"
+                                                            onClick={e => e.stopPropagation()}
+                                                            style={{
+                                                                position: 'absolute',
+                                                                top: 26,
+                                                                right: isOwn ? 6 : 'auto',
+                                                                left: isOwn ? 'auto' : 6,
+                                                                background: 'white',
+                                                                border: '1px solid #e2e8f0',
+                                                                borderRadius: 10,
+                                                                boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+                                                                zIndex: 100,
+                                                                minWidth: 175,
+                                                                overflow: 'hidden',
+                                                                display: 'flex',
+                                                                flexDirection: 'column'
+                                                            }}
+                                                        >
+                                                            {!m.isDeleted && m.text && (
+                                                                <button
+                                                                    type="button"
+                                                                    className="action-menu-item"
+                                                                    onClick={() => handleCopy(m)}
+                                                                >
+                                                                    <span>📋</span>
+                                                                    <span>Copy SMS</span>
+                                                                </button>
+                                                            )}
+                                                            {!m.isDeleted && (
+                                                                <button
+                                                                    type="button"
+                                                                    className="action-menu-item"
+                                                                    onClick={() => handleOpenForward(m)}
+                                                                >
+                                                                    <span>↗️</span>
+                                                                    <span>Forward SMS</span>
+                                                                </button>
+                                                            )}
+                                                            <button
+                                                                type="button"
+                                                                className="action-menu-item"
+                                                                onClick={() => handleDeleteForMe(m._id)}
+                                                            >
+                                                                <span>🗑️</span>
+                                                                <span>Delete for me</span>
+                                                            </button>
+                                                            {canDeleteEveryone && (
+                                                                <button
+                                                                    type="button"
+                                                                    className="action-menu-item danger"
+                                                                    onClick={() => handleDeleteForEveryone(m._id)}
+                                                                >
+                                                                    <span>💥</span>
+                                                                    <span>Delete for everyone</span>
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     )}
+
+                                                    {/* Content */}
+                                                    {m.isDeleted ? (
+                                                        <div style={{ fontStyle: 'italic', opacity: 0.75, display: 'flex', alignItems: 'center', gap: 5 }}>
+                                                            <span>🚫</span>
+                                                            <span>This message was deleted</span>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            {m.text && <div style={{ fontSize: '0.92rem', wordBreak: 'break-word', lineHeight: 1.4 }}>{m.text}</div>}
+                                                            {m.audio && (
+                                                                <div style={{ marginTop: 6 }}>
+                                                                    <audio controls src={m.audio} style={{ maxWidth: '100%', height: 36 }} />
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    )}
+
                                                     <div style={{
                                                         fontSize: '0.7rem',
                                                         marginTop: 4,
@@ -411,6 +618,20 @@ const GroupChat = () => {
                     </div>
                 )}
             </div>
+
+            {/* Forward SMS Modal */}
+            {forwardingMsg && (
+                <ForwardModal
+                    message={forwardingMsg}
+                    source="group"
+                    onClose={() => setForwardingMsg(null)}
+                    onForwardSuccess={(type) => {
+                        if (type === 'group' && socket && activeGroup) {
+                            // Automatically updated via socket group-message
+                        }
+                    }}
+                />
+            )}
         </div>
     );
 };
