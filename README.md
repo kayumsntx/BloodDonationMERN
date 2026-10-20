@@ -18,7 +18,83 @@ A full-stack blood donation platform connecting voluntary blood donors with reci
 - **Backend:** Node.js, Express, MongoDB (Mongoose), Socket.io, JWT, bcryptjs, Nodemailer
 - **Frontend:** React, Vite, React Router, Axios, Socket.io-client, react-hot-toast
 
+<<<<<<< HEAD
 ## 🚀 Quick Start
+=======
+
+![image alt](https://github.com/kayumsntx/BloodDonationMERN/blob/68b8643570c53eccf0c08c901f76478bb18ec88c/Screenshot%202026-10-16%20122345.png)
+
+![image alt](https://github.com/kayumsntx/BloodDonationMERN/blob/b80ab799664b5c82223e9d5a6c7d88ae87b67889/Screenshot%202026-10-16%20122500.png)
+
+## ✨ Features
+
+- 🔐 **User Authentication** - Register/Login with JWT
+- 🩸 **Blood Requests** - Create, view, and manage blood requests
+- 🎯 **Donor Matching** - Smart matching based on blood group & location
+- 💬 **Real-time Chat** - Instant messaging with Socket.io
+- 🔔 **Emergency Alerts** - Urgent request notifications
+- 📱 **Mobile Responsive** - Works on all devices
+- 🔍 **Search & Filter** - Find donors by blood group, location, urgency
+- 👤 **User Profiles** - Manage profile, donation history, availability
+
+---
+
+## 🛠️ Tech Stack
+
+### Backend
+- **Node.js** - Runtime environment
+- **Express.js** - Web framework
+- **MongoDB** - Database
+- **Socket.io** - Real-time communication
+- **JWT** - Authentication
+- **bcryptjs** - Password hashing
+
+### Frontend
+- **React** - UI library
+- **Vite** - Build tool
+- **Socket.io-client** - Real-time client
+- **Axios** - HTTP client
+- **React Router** - Navigation
+
+---
+
+## 📁 Project Structure
+
+# BloodDonationMERN
+
+```text
+BloodDonationMERN/
+├── server/
+│   ├── config/
+│   │   └── db.js
+│   ├── models/
+│   │   ├── User.js
+│   │   ├── BloodRequest.js
+│   │   └── Message.js
+│   ├── middleware/
+│   │   └── auth.js
+│   ├── routes/
+│   │   ├── auth.js
+│   │   ├── users.js
+│   │   ├── requests.js
+│   │   └── messages.js
+│   ├── socket/
+│   │   └── socketHandler.js
+│   ├── .env
+│   └── server.js
+├── client/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   └── package.json
+├── .gitignore
+└── README.md
+```
+
+## 🚀 Getting Started
+>>>>>>> ac3e75e9bfb00a13ddaa8e3ee88d9d0e627863c1
 
 ### Prerequisites
 - Node.js 18+
