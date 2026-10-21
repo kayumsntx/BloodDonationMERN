@@ -17,6 +17,7 @@ const ChatArea = () => {
     const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
     const [activeMenuMsgId, setActiveMenuMsgId] = useState(null);
     const [forwardingMsg, setForwardingMsg] = useState(null);
+    const [showOnlineDrawer, setShowOnlineDrawer] = useState(false);
     const messagesEndRef = useRef(null);
 
     const handleVoiceRecorded = ({ audio, audioDuration }) => {
@@ -164,25 +165,50 @@ const ChatArea = () => {
 
     return (
         <div className="chat-wrapper">
-            <div className="chat-sidebar">
-                <h3>Online ({onlineUsers.length})</h3>
-                {onlineUsers.map(u => (
-                    <div className="online-user-item" key={u._id}>
-                        <img
-                            src={u.profilePic || `https://ui-avatars.com/api/?name=${u.name}&background=dc3545&color=fff&size=50`}
-                            alt={u.name}
-                        />
-                        <div className="user-info">
-                            <div className="name">{u.name}</div>
-                            <div className="status">🟢 {u.bloodGroup}</div>
-                        </div>
+            {/* Sidebar: Online Donors (Desktop side panel, Mobile overlay drawer) */}
+            <div
+                className={`chat-sidebar ${showOnlineDrawer ? 'mobile-open' : ''}`}
+                onClick={() => setShowOnlineDrawer(false)}
+            >
+                <div className="chat-sidebar-inner" onClick={e => e.stopPropagation()}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 15px', borderBottom: '1px solid #e2e8f0' }}>
+                        <h3 style={{ margin: 0, padding: 0, border: 'none', fontSize: '0.9rem', color: '#475569', textTransform: 'uppercase' }}>
+                            Online Donors ({onlineUsers.length})
+                        </h3>
+                        <button
+                            type="button"
+                            onClick={() => setShowOnlineDrawer(false)}
+                            style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontWeight: 700, color: '#64748b' }}
+                        >
+                            ✕
+                        </button>
                     </div>
-                ))}
+                    {onlineUsers.map(u => (
+                        <div className="online-user-item" key={u._id}>
+                            <img
+                                src={u.profilePic || `https://ui-avatars.com/api/?name=${u.name}&background=dc3545&color=fff&size=50`}
+                                alt={u.name}
+                            />
+                            <div className="user-info">
+                                <div className="name">{u.name}</div>
+                                <div className="status">🟢 {u.bloodGroup}</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             <div className="chat-main">
                 <div className="chat-header">
                     <h3>💬 Public Chat Room</h3>
+                    <button
+                        type="button"
+                        className="online-toggle-btn"
+                        onClick={() => setShowOnlineDrawer(v => !v)}
+                        title="View online donors"
+                    >
+                        🟢 {onlineUsers.length} Online 👥
+                    </button>
                 </div>
 
                 <div className="chat-messages">
@@ -346,7 +372,7 @@ const ChatArea = () => {
                         onInput={handleTyping}
                         placeholder="Type a message..."
                     />
-                    <button onClick={handleSend}>Send</button>
+                    <button type="button" className="send-btn" onClick={handleSend}>Send</button>
                 </div>
             </div>
 

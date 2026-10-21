@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import Sidebar from './Sidebar';
@@ -23,6 +23,8 @@ const Dashboard = () => {
     const { logout, isStaff } = useAuth();
     const socket = useSocket();
     const navigate = useNavigate();
+    const location = useLocation();
+    const isChatRoute = location.pathname.includes('/chat') || location.pathname.includes('/groups');
     const [onlineUsers, setOnlineUsers] = useState([]);
     const [notifications, setNotifications] = useState([]);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -97,9 +99,9 @@ const Dashboard = () => {
                 isOpen={mobileMenuOpen}
                 onClose={() => setMobileMenuOpen(false)}
             />
-            <main className="main-content">
-                <VerifyEmailBanner />
-                <DonationReminder />
+            <main className={`main-content ${isChatRoute ? 'chat-mode' : ''}`}>
+                {!isChatRoute && <VerifyEmailBanner />}
+                {!isChatRoute && <DonationReminder />}
                 <div className="content-body">
                     <Routes>
                         <Route path="/" element={<Navigate to="feed" />} />
@@ -117,7 +119,7 @@ const Dashboard = () => {
                         <Route path="leaderboard" element={<Leaderboard />} />
                     </Routes>
                 </div>
-                <Footer />
+                {!isChatRoute && <Footer />}
             </main>
             {/* 🆕 Floating SOS Button */}
             <SOSButton />

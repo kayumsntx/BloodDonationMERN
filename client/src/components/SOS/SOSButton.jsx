@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import SOSModal from './SOSModal';
 
 const SOSButton = () => {
     const [showModal, setShowModal] = useState(false);
     const [pressed, setPressed] = useState(false);
+    const location = useLocation();
+    const isChat = location.pathname.includes('/chat') || location.pathname.includes('/groups');
 
     const handlePress = () => {
         setPressed(true);
@@ -13,6 +16,9 @@ const SOSButton = () => {
         }, 300);
     };
 
+    const baseSize = isChat ? 54 : 70;
+    const pressedSize = isChat ? 62 : 80;
+
     return (
         <>
             {/* Floating SOS Button */}
@@ -21,14 +27,14 @@ const SOSButton = () => {
                 title="SOS - Emergency Blood Needed"
                 style={{
                     position: 'fixed',
-                    bottom: 30,
-                    right: 30,
-                    width: pressed ? 80 : 70,
-                    height: pressed ? 80 : 70,
+                    bottom: isChat ? 78 : 30,
+                    right: isChat ? 16 : 30,
+                    width: pressed ? pressedSize : baseSize,
+                    height: pressed ? pressedSize : baseSize,
                     borderRadius: '50%',
                     background: 'linear-gradient(135deg, #e74c3c, #c0392b)',
                     color: 'white',
-                    border: '4px solid white',
+                    border: '3px solid white',
                     cursor: 'pointer',
                     boxShadow: '0 6px 20px rgba(231, 76, 60, 0.5)',
                     display: showModal ? 'none' : 'flex',
@@ -37,13 +43,13 @@ const SOSButton = () => {
                     justifyContent: 'center',
                     zIndex: 999,
                     transition: 'all 0.3s',
-                    fontSize: '0.7em',
+                    fontSize: isChat ? '0.62em' : '0.7em',
                     fontWeight: 700,
                     letterSpacing: 1,
                     animation: 'sosPulse 2s infinite'
                 }}
             >
-                <span style={{ fontSize: '1.5em' }}>🚨</span>
+                <span style={{ fontSize: isChat ? '1.2em' : '1.5em' }}>🚨</span>
                 <span>SOS</span>
             </button>
 

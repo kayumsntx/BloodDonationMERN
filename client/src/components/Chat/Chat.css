@@ -1,7 +1,7 @@
 .chat-wrapper {
     display: flex;
-    min-height: 520px;
-    height: calc(100vh - 220px);
+    min-height: 480px;
+    height: 100%;
     background: white;
     border-radius: 15px;
     overflow: hidden;
@@ -243,27 +243,135 @@
     border-color: #dc3545;
 }
 
-.chat-input-area button {
-    padding: 11px 25px;
+.chat-input-area .send-btn {
+    padding: 10px 22px;
     background: #dc3545;
     color: white;
     border: none;
     border-radius: 25px;
-    font-weight: 600;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.25);
+    transition: background 0.2s;
 }
 
-.chat-input-area button:hover {
+.chat-input-area .send-btn:hover {
     background: #c82333;
 }
 
+.online-toggle-btn {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.78rem;
+    cursor: pointer;
+    min-height: 38px;
+}
+
 @media (max-width: 768px) {
-    .chat-sidebar {
-        width: 100px;
+    .chat-wrapper {
+        height: 100%;
+        min-height: 0;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
     }
-    .chat-sidebar .user-info {
+
+    /* Hide sidebar by default on mobile so chat has 100% width */
+    .chat-sidebar {
         display: none;
     }
+
+    /* Overlay drawer when opened on mobile */
+    .chat-sidebar.mobile-open {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100vh;
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(3px);
+        z-index: 1000;
+        padding: 20px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .chat-sidebar.mobile-open .chat-sidebar-inner {
+        background: white;
+        border-radius: 18px;
+        width: 100%;
+        max-width: 340px;
+        max-height: 80vh;
+        overflow-y: auto;
+        padding: 16px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .chat-sidebar.mobile-open .user-info {
+        display: block;
+    }
+
+    .online-toggle-btn {
+        display: inline-flex;
+    }
+
+    .chat-header {
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .chat-header h3 {
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .chat-messages {
+        padding: 12px 10px;
+        gap: 8px;
+    }
+
     .chat-message {
-        max-width: 85%;
+        max-width: 88%;
+        font-size: 0.88rem;
+        padding: 8px 12px;
+    }
+
+    .chat-input-area {
+        padding: 8px 10px;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .chat-input-area input {
+        padding: 9px 12px;
+        font-size: 16px; /* Prevents auto zoom */
+        border-radius: 20px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .chat-input-area .send-btn {
+        padding: 0 16px;
+        min-height: 42px;
+        font-size: 0.88rem;
+        border-radius: 20px;
     }
 }
+

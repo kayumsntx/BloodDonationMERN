@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import VoiceRecorder from './VoiceRecorder';
 import ForwardModal from './ForwardModal';
 import toast from 'react-hot-toast';
+import './GroupChat.css';
 
 const GroupChat = () => {
     const { user } = useAuth();
@@ -17,6 +18,7 @@ const GroupChat = () => {
     const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
     const [activeMenuMsgId, setActiveMenuMsgId] = useState(null);
     const [forwardingMsg, setForwardingMsg] = useState(null);
+    const [showCommunities, setShowCommunities] = useState(false);
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
@@ -191,136 +193,126 @@ const GroupChat = () => {
     };
 
     return (
-        <div style={{
-            display: 'grid',
-            gridTemplateColumns: '300px 1fr',
-            gap: 20,
-            height: 'calc(100vh - 140px)',
-            minHeight: 520
-        }}>
-            {/* Left Sidebar: Groups List */}
-            <div style={{
-                background: 'white',
-                borderRadius: 16,
-                padding: '20px 16px',
-                border: '1px solid #e2e8f0',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden'
-            }}>
-                <div style={{ marginBottom: 15, paddingBottom: 10, borderBottom: '1px solid #f1f5f9' }}>
-                    <h3 style={{ margin: '0 0 4px', fontSize: '1.15rem', color: '#1e293b' }}>
-                        🩸 Blood Group Communities
-                    </h3>
-                    <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>
-                        Connect with donors having your same blood type
-                    </p>
-                </div>
+        <div className="group-chat-container">
+            {/* Left Sidebar: Blood Group Communities (Desktop side panel, Mobile slide-over drawer) */}
+            <div
+                className={`group-chat-sidebar ${showCommunities ? 'mobile-open' : ''}`}
+                onClick={() => setShowCommunities(false)}
+            >
+                <div className="group-chat-sidebar-inner" onClick={e => e.stopPropagation()}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14, paddingBottom: 10, borderBottom: '1px solid #f1f5f9' }}>
+                        <div>
+                            <h3 style={{ margin: '0 0 4px', fontSize: '1.15rem', color: '#1e293b' }}>
+                                🩸 Blood Group Communities
+                            </h3>
+                            <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>
+                                Connect with donors having your same blood type
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            className="mobile-drawer-close-btn"
+                            onClick={() => setShowCommunities(false)}
+                            title="Close communities drawer"
+                        >
+                            ✕
+                        </button>
+                    </div>
 
-                <div style={{ flex: 1, overflowY: 'auto', paddingRight: 4 }}>
-                    {loading && <div style={{ padding: 20, textAlign: 'center', color: '#94a3b8' }}>Loading groups...</div>}
-                    {groups.map(g => {
-                        const isActive = activeGroup?._id === g._id;
-                        return (
-                            <div
-                                key={g._id}
-                                onClick={() => {
-                                    if (g.isMember) setActiveGroup(g);
-                                }}
-                                style={{
-                                    padding: '12px 14px',
-                                    background: isActive
-                                        ? 'linear-gradient(135deg, #ef4444, #dc2626)'
-                                        : '#f8fafc',
-                                    color: isActive ? 'white' : '#1e293b',
-                                    borderRadius: 12,
-                                    marginBottom: 10,
-                                    cursor: g.isMember ? 'pointer' : 'default',
-                                    border: isActive ? 'none' : '1px solid #e2e8f0',
-                                    transition: 'all 0.2s',
-                                    boxShadow: isActive ? '0 4px 12px rgba(239, 68, 68, 0.25)' : 'none'
-                                }}
-                            >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div style={{ fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 6 }}>
-                                        <span>{g.icon || '🩸'}</span>
-                                        <span>{g.bloodGroup} Blood Group</span>
-                                        {g.isRecommended && (
-                                            <span
-                                                title="Your Blood Group"
+                    <div style={{ flex: 1, overflowY: 'auto', paddingRight: 4 }}>
+                        {loading && <div style={{ padding: 20, textAlign: 'center', color: '#94a3b8' }}>Loading groups...</div>}
+                        {groups.map(g => {
+                            const isActive = activeGroup?._id === g._id;
+                            return (
+                                <div
+                                    key={g._id}
+                                    onClick={() => {
+                                        if (g.isMember) {
+                                            setActiveGroup(g);
+                                            setShowCommunities(false);
+                                        }
+                                    }}
+                                    style={{
+                                        padding: '12px 14px',
+                                        background: isActive
+                                            ? 'linear-gradient(135deg, #ef4444, #dc2626)'
+                                            : '#f8fafc',
+                                        color: isActive ? 'white' : '#1e293b',
+                                        borderRadius: 12,
+                                        marginBottom: 10,
+                                        cursor: g.isMember ? 'pointer' : 'default',
+                                        border: isActive ? 'none' : '1px solid #e2e8f0',
+                                        transition: 'all 0.2s',
+                                        boxShadow: isActive ? '0 4px 12px rgba(239, 68, 68, 0.25)' : 'none'
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div style={{ fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <span>{g.icon || '🩸'}</span>
+                                            <span>{g.bloodGroup} Blood Group</span>
+                                            {g.isRecommended && (
+                                                <span
+                                                    title="Your Blood Group"
+                                                    style={{
+                                                        fontSize: '0.7em',
+                                                        background: isActive ? 'rgba(255,255,255,0.25)' : '#fef3c7',
+                                                        color: isActive ? 'white' : '#b45309',
+                                                        padding: '2px 6px',
+                                                        borderRadius: 8,
+                                                        fontWeight: 600
+                                                    }}
+                                                >
+                                                    You ⭐
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div style={{
+                                        fontSize: '0.75rem',
+                                        marginTop: 4,
+                                        color: isActive ? 'rgba(255,255,255,0.85)' : '#64748b',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
+                                    }}>
+                                        <span>👥 {g.memberCount} members</span>
+                                        {!g.isMember && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    joinGroup(g._id);
+                                                }}
                                                 style={{
-                                                    fontSize: '0.7em',
-                                                    background: isActive ? 'rgba(255,255,255,0.25)' : '#fef3c7',
-                                                    color: isActive ? 'white' : '#b45309',
-                                                    padding: '2px 6px',
+                                                    padding: '4px 12px',
+                                                    background: '#10b981',
+                                                    color: 'white',
+                                                    border: 'none',
                                                     borderRadius: 8,
-                                                    fontWeight: 600
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 600,
+                                                    cursor: 'pointer'
                                                 }}
                                             >
-                                                You ⭐
-                                            </span>
+                                                + Join Group
+                                            </button>
                                         )}
                                     </div>
                                 </div>
-                                <div style={{
-                                    fontSize: '0.75rem',
-                                    marginTop: 4,
-                                    color: isActive ? 'rgba(255,255,255,0.85)' : '#64748b',
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center'
-                                }}>
-                                    <span>👥 {g.memberCount} members</span>
-                                    {!g.isMember && (
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                joinGroup(g._id);
-                                            }}
-                                            style={{
-                                                padding: '4px 12px',
-                                                background: '#10b981',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: 8,
-                                                fontSize: '0.75rem',
-                                                fontWeight: 600,
-                                                cursor: 'pointer'
-                                            }}
-                                        >
-                                            + Join Group
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
 
             {/* Right Area: Messages */}
-            <div style={{
-                background: 'white',
-                borderRadius: 16,
-                border: '1px solid #e2e8f0',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden'
-            }}>
+            <div className="group-chat-main">
                 {activeGroup ? (
                     <>
-                        {/* Header */}
-                        <div style={{
-                            padding: '16px 20px',
-                            borderBottom: '1px solid #e2e8f0',
-                            background: '#fafafa',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between'
-                        }}>
-                            <div>
-                                <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        {/* Header with Communities Toggle Button */}
+                        <div className="group-chat-header">
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                                <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b', display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                     <span>{activeGroup.icon || '🩸'}</span>
                                     <span>{activeGroup.name || `${activeGroup.bloodGroup} Blood Group`}</span>
                                 </h3>
@@ -328,16 +320,27 @@ const GroupChat = () => {
                                     {activeGroup.description || `Discussion for ${activeGroup.bloodGroup} donors and emergency needs`}
                                 </p>
                             </div>
-                            <span style={{
-                                fontSize: '0.8rem',
-                                background: '#fee2e2',
-                                color: '#dc2626',
-                                fontWeight: 700,
-                                padding: '4px 10px',
-                                borderRadius: 12
-                            }}>
-                                🩸 {activeGroup.bloodGroup}
-                            </span>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                                <button
+                                    type="button"
+                                    className="communities-toggle-btn"
+                                    onClick={() => setShowCommunities(v => !v)}
+                                    title="View Blood Group Communities"
+                                >
+                                    🩸 Communities ▾
+                                </button>
+                                <span style={{
+                                    fontSize: '0.8rem',
+                                    background: '#fee2e2',
+                                    color: '#dc2626',
+                                    fontWeight: 700,
+                                    padding: '5px 10px',
+                                    borderRadius: 12
+                                }}>
+                                    🩸 {activeGroup.bloodGroup}
+                                </span>
+                            </div>
                         </div>
 
                         {/* Message Feed */}
@@ -538,14 +541,7 @@ const GroupChat = () => {
                         )}
 
                         {/* Input bar */}
-                        <div style={{
-                            padding: '14px 18px',
-                            borderTop: '1px solid #e2e8f0',
-                            background: 'white',
-                            display: 'flex',
-                            gap: 10,
-                            alignItems: 'center'
-                        }}>
+                        <div className="group-chat-input-bar">
                             <button
                                 type="button"
                                 onClick={() => setShowVoiceRecorder(v => !v)}
@@ -557,44 +553,30 @@ const GroupChat = () => {
                                     borderRadius: '50%',
                                     width: 40,
                                     height: 40,
+                                    minWidth: 40,
                                     cursor: 'pointer',
                                     fontSize: '1.1em',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    transition: 'all 0.2s'
+                                    transition: 'all 0.2s',
+                                    flexShrink: 0
                                 }}
                             >
                                 🎤
                             </button>
                             <input
                                 type="text"
+                                className="group-chat-input"
                                 value={text}
                                 onChange={e => setText(e.target.value)}
                                 onKeyDown={e => e.key === 'Enter' && sendMessage()}
                                 placeholder={`Message ${activeGroup.bloodGroup} community...`}
-                                style={{
-                                    flex: 1,
-                                    padding: '10px 18px',
-                                    borderRadius: 24,
-                                    border: '1px solid #cbd5e1',
-                                    outline: 'none',
-                                    fontSize: '0.92rem'
-                                }}
                             />
                             <button
                                 type="button"
+                                className="group-send-btn"
                                 onClick={sendMessage}
-                                style={{
-                                    background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: 24,
-                                    padding: '10px 22px',
-                                    fontWeight: 700,
-                                    cursor: 'pointer',
-                                    boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
-                                }}
                             >
                                 Send
                             </button>
@@ -608,13 +590,22 @@ const GroupChat = () => {
                         justifyContent: 'center',
                         flex: 1,
                         color: '#64748b',
-                        padding: 40
+                        padding: 30,
+                        textAlign: 'center'
                     }}>
                         <div style={{ fontSize: '3.5rem', marginBottom: 12 }}>🩸</div>
                         <h3 style={{ margin: '0 0 8px', color: '#1e293b' }}>Select a Blood Group</h3>
-                        <p style={{ margin: 0, textAlign: 'center', maxWidth: 360, fontSize: '0.9rem' }}>
+                        <p style={{ margin: '0 0 18px', maxWidth: 360, fontSize: '0.9rem', lineHeight: 1.5 }}>
                             Join your blood type group or browse other groups to connect with donors and coordinate blood donations.
                         </p>
+                        <button
+                            type="button"
+                            onClick={() => setShowCommunities(true)}
+                            className="group-send-btn"
+                            style={{ gap: 8, padding: '10px 22px' }}
+                        >
+                            🩸 Open Blood Group Communities
+                        </button>
                     </div>
                 )}
             </div>
