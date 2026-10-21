@@ -13,6 +13,7 @@ import ResetPassword from './components/Auth/ResetPassword';
 import VerifyEmail from './components/Auth/VerifyEmail';
 import Dashboard from './components/Dashboard/Dashboard';
 import PrivateRoute from './components/Auth/PrivateRoute';
+import ReportIssue from './components/Common/ReportIssue';
 
 function App() {
     return (
@@ -28,6 +29,7 @@ function App() {
                             <Route path="/forgot-password" element={<ForgotPassword />} />
                             <Route path="/reset-password/:token" element={<ResetPassword />} />
                             <Route path="/verify-email/:token" element={<VerifyEmail />} />
+                            <Route path="/report-issue" element={<ReportIssue />} />
 
                             {/* Protected Routes */}
                             <Route path="/dashboard/*" element={

@@ -60,6 +60,8 @@ app.use('/api/leaderboard', require('./routes/leaderboard'));
 app.use('/api/sos', require('./routes/sos'));
 app.use('/api/groups', require('./routes/groups'));
 app.use('/api/posts', require('./routes/posts'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/reports', require('./routes/reports'));
 
 // ========== Health Check ==========
 app.get('/api/health', (req, res) => {

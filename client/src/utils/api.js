@@ -18,11 +18,14 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Handle 401 errors globally
+// Handle 401 and 403 (suspended/banned) errors globally
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
+        const status = error.response?.status;
+        const userStatus = error.response?.data?.status;
+
+        if (status === 401 || (status === 403 && (userStatus === 'suspended' || userStatus === 'banned'))) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             if (window.location.pathname !== '/login') {

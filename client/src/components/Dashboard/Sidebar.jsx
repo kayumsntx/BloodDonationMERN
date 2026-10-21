@@ -82,11 +82,43 @@ const Sidebar = ({ onLogout, onlineCount, notificationCount }) => {
                 />
                 <SidebarLink to="/dashboard/groups" icon="🩸" label="Group Chats" />
                 <SidebarLink to="/dashboard/blog" icon="📚" label="Articles & Blog" />
-                {isStaff && (
-                    <SidebarLink to="/dashboard/approvals" icon="🛡️" label="Approval Dashboard" />
-                )}
                 <SidebarLink to="/dashboard/leaderboard" icon="🏆" label="Leaderboard" />
                 <SidebarLink to="/dashboard/profile" icon="👤" label="My Profile" />
+
+                {/* Staff / Admin Section */}
+                {isStaff && (
+                    <div style={{ marginTop: 15, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div style={{
+                            fontSize: '0.7rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.08em',
+                            color: '#94a3b8',
+                            padding: '0 12px 6px',
+                            fontWeight: 700
+                        }}>
+                            {(user?.role === 'super_admin' || user?.role === 'admin') ? 'Administration' : 'Moderation Hub'}
+                        </div>
+
+                        {/* User Management: ONLY super_admin and admin */}
+                        {(user?.role === 'super_admin' || user?.role === 'admin') && (
+                            <SidebarLink to="/dashboard/admin?tab=users" icon="👥" label="User Management" />
+                        )}
+
+                        {/* Post Management: super_admin, admin, and moderator */}
+                        <SidebarLink to="/dashboard/admin?tab=posts" icon="📝" label="Post Management" />
+
+                        {/* Reported Articles: super_admin, admin, and moderator */}
+                        <SidebarLink to="/dashboard/admin?tab=reported_articles" icon="🚩" label="Reported Articles" />
+
+                        {/* General Reports: super_admin, admin, and moderator */}
+                        <SidebarLink to="/dashboard/admin?tab=general_reports" icon="📋" label="General Reports" />
+                    </div>
+                )}
+
+                {/* Support & Issue Reporting for all users */}
+                <div style={{ marginTop: 15, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                    <SidebarLink to="/dashboard/report-issue" icon="🛡️" label="Report an Issue" />
+                </div>
             </nav>
 
             <div style={{ padding: '12px 15px', borderTop: '1px solid #3d566e' }}>

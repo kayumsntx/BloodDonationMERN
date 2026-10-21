@@ -1,0 +1,331 @@
+/* Admin Dashboard Styles */
+.admin-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+}
+
+.admin-header-card {
+    background: white;
+    padding: 24px 28px;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.admin-header-title h2 {
+    margin: 0 0 6px 0;
+    font-size: 1.5rem;
+    color: #1e293b;
+    font-weight: 800;
+}
+
+.admin-header-title p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.admin-role-pill {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid transparent;
+}
+
+.admin-role-pill.super_admin {
+    background: #fef3c7;
+    color: #b45309;
+    border-color: #fde68a;
+}
+
+.admin-role-pill.admin {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fecdd3;
+}
+
+.admin-role-pill.moderator {
+    background: #f3e8ff;
+    color: #7e22ce;
+    border-color: #e9d5ff;
+}
+
+/* Sub-Navigation Tabs */
+.admin-nav-tabs {
+    display: flex;
+    gap: 10px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+.admin-nav-tab {
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #64748b;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-nav-tab:hover {
+    color: #1e293b;
+}
+
+.admin-nav-tab.active {
+    color: #dc2626;
+    border-bottom-color: #dc2626;
+}
+
+.admin-tab-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.admin-tab-badge.red {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.admin-tab-badge.gray {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+/* Summary Stats Grid */
+.admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.admin-stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.admin-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.admin-stat-info h4 {
+    margin: 0 0 2px 0;
+    font-size: 1.5rem;
+    color: #1e293b;
+    font-weight: 800;
+}
+
+.admin-stat-info p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+/* Tables */
+.admin-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    overflow: hidden;
+}
+
+.admin-card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    background: #fafafa;
+}
+
+.admin-card-header h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.admin-table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.admin-table th {
+    background: #f8fafc;
+    color: #475569;
+    padding: 14px 18px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.admin-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: middle;
+}
+
+.admin-table tbody tr:hover {
+    background: #fcfcfc;
+}
+
+/* Badges */
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+.badge-status.active {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.badge-status.suspended {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.badge-status.banned {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.badge-status.pending {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.badge-status.in_progress {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.badge-status.resolved {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.badge-status.reviewed {
+    background: #e0f2fe;
+    color: #0284c7;
+}
+
+/* Action Buttons */
+.btn-action {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s;
+}
+
+.btn-action.success {
+    background: #10b981;
+    color: white;
+}
+.btn-action.success:hover {
+    background: #059669;
+}
+
+.btn-action.warning {
+    background: #f59e0b;
+    color: white;
+}
+.btn-action.warning:hover {
+    background: #d97706;
+}
+
+.btn-action.danger {
+    background: #ef4444;
+    color: white;
+}
+.btn-action.danger:hover {
+    background: #dc2626;
+}
+
+.btn-action.secondary {
+    background: #f1f5f9;
+    color: #475569;
+}
+.btn-action.secondary:hover {
+    background: #e2e8f0;
+}
+
+/* Select Dropdown */
+.select-role {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: white;
+    cursor: pointer;
+    outline: none;
+}
+
+.select-role:disabled {
+    background: #f8fafc;
+    color: #94a3b8;
+    cursor: not-allowed;
+    border-color: #e2e8f0;
+}

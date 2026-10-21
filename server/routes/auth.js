@@ -34,6 +34,7 @@ const userResponse = (user, token) => ({
     isVerified: user.isVerified || false,
     isEmailVerified: user.isEmailVerified || false,
     role: user.role || 'user',
+    status: user.status || (user.isBlocked ? 'banned' : 'active'),
     bio: user.bio || '',
     createdAt: user.createdAt,
     ...(token ? { token } : {})

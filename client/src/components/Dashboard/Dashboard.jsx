@@ -15,10 +15,12 @@ import VerifyEmailBanner from '../Common/VerifyEmailBanner';
 import DonationReminder from './DonationReminder';
 import Leaderboard from '../Leaderboard/Leaderboard';
 import SOSButton from '../SOS/SOSButton';
+import AdminDashboard from '../Admin/AdminDashboard';
+import ReportIssue from '../Common/ReportIssue';
 import './Dashboard.css';
 
 const Dashboard = () => {
-    const { logout } = useAuth();
+    const { logout, isStaff } = useAuth();
     const socket = useSocket();
     const navigate = useNavigate();
     const [onlineUsers, setOnlineUsers] = useState([]);
@@ -62,7 +64,11 @@ const Dashboard = () => {
                         <Route path="chat" element={<ChatArea />} />
                         <Route path="groups" element={<GroupChat />} />
                         <Route path="blog" element={<BlogList />} />
-                        <Route path="approvals" element={<ApprovalDashboard />} />
+                        <Route path="approvals" element={<Navigate to="/dashboard/admin?tab=posts" replace />} />
+                        <Route path="admin" element={
+                            isStaff ? <AdminDashboard /> : <Navigate to="/dashboard/feed" replace />
+                        } />
+                        <Route path="report-issue" element={<ReportIssue />} />
                         <Route path="profile" element={<Profile />} />
                         <Route path="leaderboard" element={<Leaderboard />} />
                     </Routes>

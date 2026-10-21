@@ -15,10 +15,14 @@ const protect = async (req, res, next) => {
                 return res.status(401).json({ message: 'User not found' });
             }
 
-            if (req.user.isBlocked) {
+            if (req.user.status === 'suspended' || req.user.status === 'banned' || req.user.isBlocked) {
+                const statusMessage = req.user.status === 'suspended'
+                    ? 'Your account has been temporarily suspended by an administrator.'
+                    : 'Your account has been banned from the platform.';
                 return res.status(403).json({ 
-                    message: 'Your account has been blocked',
-                    reason: req.user.blockedReason 
+                    message: statusMessage,
+                    status: req.user.status || 'banned',
+                    reason: req.user.blockedReason || ''
                 });
             }
 

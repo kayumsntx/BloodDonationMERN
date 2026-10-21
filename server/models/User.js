@@ -143,6 +143,11 @@ const UserSchema = new mongoose.Schema({
         enum: ['super_admin', 'admin', 'moderator', 'doctor', 'special_member', 'user'],
         default: 'user'
     },
+    status: {
+        type: String,
+        enum: ['active', 'suspended', 'banned'],
+        default: 'active'
+    },
     isBlocked: {
         type: Boolean,
         default: false

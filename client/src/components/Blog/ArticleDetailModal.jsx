@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
+import ReportArticleModal from './ReportArticleModal';
 
 const ArticleDetailModal = ({ postId, onClose, onPostUpdated }) => {
     const { user } = useAuth();
@@ -12,6 +13,7 @@ const ArticleDetailModal = ({ postId, onClose, onPostUpdated }) => {
     const [userRating, setUserRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
     const [submittingRating, setSubmittingRating] = useState(false);
+    const [showReportModal, setShowReportModal] = useState(false);
 
     useEffect(() => {
         if (!postId) return;
@@ -126,9 +128,34 @@ const ArticleDetailModal = ({ postId, onClose, onPostUpdated }) => {
                                     <span>{post.credibilityBadge || 'Verified Medical Advice'}</span>
                                 </span>
                             )}
-                            <span style={{ fontSize: '0.8rem', color: '#94a3b8', marginLeft: 'auto' }}>
-                                👁️ {post.views} views • {new Date(post.createdAt).toLocaleDateString()}
-                            </span>
+                            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                                    👁️ {post.views} views • {new Date(post.createdAt).toLocaleDateString()}
+                                </span>
+                                {user && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowReportModal(true)}
+                                        title="Report this article to admin"
+                                        style={{
+                                            background: '#fef2f2',
+                                            border: '1px solid #fecdd3',
+                                            color: '#dc2626',
+                                            borderRadius: 8,
+                                            padding: '3px 8px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 600,
+                                            cursor: 'pointer',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: 4
+                                        }}
+                                    >
+                                        <span>🚩</span>
+                                        <span>Report</span>
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         {/* Title */}
@@ -360,6 +387,14 @@ const ArticleDetailModal = ({ postId, onClose, onPostUpdated }) => {
                             </div>
                         </div>
                     </div>
+                )}
+
+                {showReportModal && post && (
+                    <ReportArticleModal
+                        post={post}
+                        onClose={() => setShowReportModal(false)}
+                        onReportSubmitted={() => {}}
+                    />
                 )}
             </div>
         </div>
