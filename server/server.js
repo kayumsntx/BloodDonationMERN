@@ -5,7 +5,9 @@ const io = require('socket.io')(http, {
     cors: {
         origin: "*",
         methods: ["GET", "POST"]
-    }
+    },
+    pingInterval: 25000,
+    pingTimeout: 20000
 });
 const cors = require('cors');
 const dotenv = require('dotenv');

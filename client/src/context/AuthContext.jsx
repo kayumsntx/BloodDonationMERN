@@ -7,21 +7,28 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    // Synchronous lazy initialization: eliminates momentary null state during page reload
+    const [user, setUser] = useState(() => {
+        try {
+            const token = localStorage.getItem('token');
+            const userData = localStorage.getItem('user');
+            if (token && userData) {
+                return JSON.parse(userData);
+            }
+        } catch (e) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+        }
+        return null;
+    });
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        // Double-check token validity on mount
         const token = localStorage.getItem('token');
-        const userData = localStorage.getItem('user');
-        if (token && userData) {
-            try {
-                setUser(JSON.parse(userData));
-            } catch (e) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-            }
+        if (!token && user) {
+            setUser(null);
         }
-        setLoading(false);
     }, []);
 
     const login = async (email, password) => {
@@ -109,7 +116,12 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const logout = () => {
+    const logout = async () => {
+        try {
+            await api.post('/auth/logout');
+        } catch (e) {
+            // Ignore error if network fails during logout
+        }
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);

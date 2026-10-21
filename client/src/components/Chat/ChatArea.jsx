@@ -52,6 +52,7 @@ const ChatArea = () => {
             }));
         });
         socket.on('online-users', (users) => setOnlineUsers(users));
+        socket.emit('get-online-users');
         socket.on('user-typing', ({ from, isTyping }) => {
             setTypingUsers(prev => ({ ...prev, [from]: isTyping }));
         });

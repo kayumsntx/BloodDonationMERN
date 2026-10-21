@@ -30,6 +30,8 @@ const Dashboard = () => {
         if (!socket) return;
 
         socket.on('online-users', (users) => setOnlineUsers(users));
+        // Immediately fetch current online users list
+        socket.emit('get-online-users');
 
         socket.on('new-request', (req) => {
             setNotifications(prev => [{ id: Date.now(), ...req }, ...prev]);

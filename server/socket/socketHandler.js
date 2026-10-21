@@ -3,32 +3,111 @@ const Message = require('../models/Message');
 const GroupMessage = require('../models/GroupMessage');
 const { saveMessage } = require('../routes/messages');
 
+// ========== Online Status Tracking & Grace Period Management ==========
+// Map of userId -> Set of socket IDs currently connected
+const userSockets = new Map();
+// Map of userId -> Disconnect grace period timer
+const disconnectTimers = new Map();
+// Grace period (5 seconds) to survive page reloads and brief network reconnects
+const GRACE_PERIOD_MS = 5000;
+
 module.exports = (io) => {
     io.on('connection', (socket) => {
         console.log('🟢 New socket connected:', socket.id);
 
+        // ========== User Join / Online Registration ==========
         socket.on('user-join', async (data) => {
             const { userId } = data || {};
             if (!userId) return;
-            socket.userId = userId;
 
-            await User.findByIdAndUpdate(userId, {
-                isOnline: true,
-                lastActive: Date.now()
-            });
+            const strUserId = String(userId);
+            socket.userId = strUserId;
 
-            socket.join(userId);
+            // 1. Cancel any pending disconnect timer for this user (reconnected before grace period expired)
+            if (disconnectTimers.has(strUserId)) {
+                clearTimeout(disconnectTimers.get(strUserId));
+                disconnectTimers.delete(strUserId);
+                console.log(`⏱️ Cancelled disconnect grace timer for user ${strUserId} (reconnected in time)`);
+            }
 
-            const onlineUsers = await User.find({ isOnline: true }).select('-password');
-            io.emit('online-users', onlineUsers);
+            // 2. Track this socket in the user's active sockets set
+            if (!userSockets.has(strUserId)) {
+                userSockets.set(strUserId, new Set());
+            }
+            userSockets.get(strUserId).add(socket.id);
 
-            const messages = await Message.find({ type: 'public' })
-                .sort({ createdAt: -1 })
-                .limit(50)
-                .populate('sender', 'name profilePic');
-            socket.emit('public-messages', messages.reverse());
+            // 3. Join the personal user room for targeted notifications & SOS alerts
+            socket.join(strUserId);
+
+            // 4. Update the user status to isOnline: true in database
+            try {
+                await User.findByIdAndUpdate(strUserId, {
+                    isOnline: true,
+                    lastActive: Date.now()
+                });
+
+                // 5. Broadcast fresh online users list to all connected clients
+                const onlineUsers = await User.find({ isOnline: true }).select('-password');
+                io.emit('online-users', onlineUsers);
+            } catch (err) {
+                console.error('Error updating user online status on join:', err.message);
+            }
+
+            // 6. Send recent public chat messages
+            try {
+                const messages = await Message.find({ type: 'public' })
+                    .sort({ createdAt: -1 })
+                    .limit(50)
+                    .populate('sender', 'name profilePic');
+                socket.emit('public-messages', messages.reverse());
+            } catch (err) {
+                console.error('Error sending public messages:', err.message);
+            }
         });
 
+        // ========== On-Demand Online Users Request ==========
+        socket.on('get-online-users', async () => {
+            try {
+                const onlineUsers = await User.find({ isOnline: true }).select('-password');
+                socket.emit('online-users', onlineUsers);
+            } catch (err) {
+                console.error('Error fetching online users on demand:', err.message);
+            }
+        });
+
+        // ========== Explicit User Leave / Logout ==========
+        socket.on('user-leave', async (data) => {
+            const userId = data?.userId ? String(data.userId) : socket.userId;
+            if (!userId) return;
+
+            // Cancel any pending grace timer
+            if (disconnectTimers.has(userId)) {
+                clearTimeout(disconnectTimers.get(userId));
+                disconnectTimers.delete(userId);
+            }
+
+            // Clear all socket tracking for this user
+            userSockets.delete(userId);
+
+            try {
+                await User.findByIdAndUpdate(userId, {
+                    isOnline: false,
+                    lastActive: Date.now()
+                });
+                const onlineUsers = await User.find({ isOnline: true }).select('-password');
+                io.emit('online-users', onlineUsers);
+                console.log(`🚪 User ${userId} logged out explicitly (immediate offline)`);
+            } catch (err) {
+                console.error('Error marking user offline on leave:', err.message);
+            }
+        });
+
+        // ========== Heartbeat / Ping-Pong ==========
+        socket.on('ping', () => {
+            socket.emit('pong', { timestamp: Date.now() });
+        });
+
+        // ========== Chat Messages Handlers ==========
         socket.on('chat-message', async (data) => {
             const { text, image, isGif, audio, audioDuration } = data || {};
             const message = await saveMessage({
@@ -80,7 +159,7 @@ module.exports = (io) => {
             }
         });
 
-        // ========== Group Chat Handlers (Day 13) ==========
+        // ========== Group Chat Handlers ==========
         socket.on('join-group', (groupId) => {
             if (groupId) {
                 socket.join(`group:${groupId}`);
@@ -107,7 +186,7 @@ module.exports = (io) => {
             }
         });
 
-        // ========== Delete Message Real-Time Handlers ==========
+        // ========== Delete Message Handlers ==========
         socket.on('delete-message', (data) => {
             const { messageId, type, toUserId } = data || {};
             if (type === 'private' && toUserId) {
@@ -145,17 +224,55 @@ module.exports = (io) => {
             io.emit('sos-cancelled', { sosId });
         });
 
+        // ========== Disconnect Handler with Grace Period ==========
         socket.on('disconnect', async () => {
-            if (socket.userId) {
-                await User.findByIdAndUpdate(socket.userId, {
-                    isOnline: false,
-                    lastActive: Date.now()
-                });
+            const userId = socket.userId;
+            console.log(`🔴 Socket disconnected: ${socket.id} (User: ${userId || 'anonymous'})`);
 
-                const onlineUsers = await User.find({ isOnline: true }).select('-password');
-                io.emit('online-users', onlineUsers);
+            if (!userId) return;
+
+            // Remove this specific socket ID from the user's active sockets set
+            if (userSockets.has(userId)) {
+                userSockets.get(userId).delete(socket.id);
+                if (userSockets.get(userId).size === 0) {
+                    userSockets.delete(userId);
+                }
             }
-            console.log('🔴 Socket disconnected:', socket.id);
+
+            // Check if user still has other active sockets (e.g. multiple tabs or newly reloaded tab)
+            const hasRemainingSockets = userSockets.has(userId) && userSockets.get(userId).size > 0;
+            if (hasRemainingSockets) {
+                console.log(`ℹ️ User ${userId} still has active socket connection(s). Remaining online.`);
+                return;
+            }
+
+            // User has 0 active sockets. Do NOT mark offline immediately!
+            // Start a grace period timer to allow page reloads or temporary network reconnects.
+            if (disconnectTimers.has(userId)) {
+                clearTimeout(disconnectTimers.get(userId));
+            }
+
+            const timer = setTimeout(async () => {
+                disconnectTimers.delete(userId);
+
+                // Double check that user has not reconnected in the meantime
+                const isStillDisconnected = !userSockets.has(userId) || userSockets.get(userId).size === 0;
+                if (isStillDisconnected) {
+                    try {
+                        await User.findByIdAndUpdate(userId, {
+                            isOnline: false,
+                            lastActive: Date.now()
+                        });
+                        const onlineUsers = await User.find({ isOnline: true }).select('-password');
+                        io.emit('online-users', onlineUsers);
+                        console.log(`⚪ User ${userId} marked offline after ${GRACE_PERIOD_MS}ms grace period`);
+                    } catch (err) {
+                        console.error('Error marking user offline after grace period:', err.message);
+                    }
+                }
+            }, GRACE_PERIOD_MS);
+
+            disconnectTimers.set(userId, timer);
         });
     });
 };

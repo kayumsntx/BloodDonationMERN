@@ -217,6 +217,13 @@ router.post('/logout', protect, async (req, res) => {
             isOnline: false,
             lastActive: new Date()
         });
+
+        const io = req.app.get('io');
+        if (io) {
+            const onlineUsers = await User.find({ isOnline: true }).select('-password');
+            io.emit('online-users', onlineUsers);
+        }
+
         res.json({ message: 'Logged out' });
     } catch (error) {
         res.status(500).json({ message: error.message });
