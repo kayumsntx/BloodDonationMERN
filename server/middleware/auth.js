@@ -15,14 +15,34 @@ const protect = async (req, res, next) => {
                 return res.status(401).json({ message: 'User not found' });
             }
 
-            if (req.user.status === 'suspended' || req.user.status === 'banned' || req.user.isBlocked) {
-                const statusMessage = req.user.status === 'suspended'
-                    ? 'Your account has been temporarily suspended by an administrator.'
-                    : 'Your account has been banned from the platform.';
-                return res.status(403).json({ 
-                    message: statusMessage,
-                    status: req.user.status || 'banned',
-                    reason: req.user.blockedReason || ''
+            // Durational Suspension & Ban Enforcement
+            if (req.user.status === 'suspended') {
+                // If suspension period has expired, automatically lift suspension
+                if (req.user.suspendedUntil && new Date(req.user.suspendedUntil) <= new Date()) {
+                    req.user.status = 'active';
+                    req.user.suspendedUntil = null;
+                    req.user.suspensionReason = '';
+                    req.user.isBlocked = false;
+                    await req.user.save({ validateBeforeSave: false });
+                } else {
+                    const untilDate = req.user.suspendedUntil;
+                    const formattedUntil = untilDate
+                        ? new Date(untilDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                        : 'further notice';
+                    return res.status(403).json({
+                        message: `Your account is temporarily suspended until ${formattedUntil}. Reason: ${req.user.suspensionReason || 'Administrative review'}`,
+                        status: 'suspended',
+                        suspendedUntil: req.user.suspendedUntil,
+                        reason: req.user.suspensionReason || 'Administrative review'
+                    });
+                }
+            }
+
+            if (req.user.status === 'banned' || req.user.isBlocked) {
+                return res.status(403).json({
+                    message: `Your account has been permanently banned. Reason: ${req.user.banReason || req.user.blockedReason || 'Policy violation'}`,
+                    status: 'banned',
+                    reason: req.user.banReason || req.user.blockedReason || 'Policy violation'
                 });
             }
 

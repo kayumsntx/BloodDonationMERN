@@ -96,10 +96,33 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        if (user.isBlocked) {
+        // Durational suspension check
+        if (user.status === 'suspended') {
+            if (user.suspendedUntil && new Date(user.suspendedUntil) <= new Date()) {
+                user.status = 'active';
+                user.suspendedUntil = null;
+                user.suspensionReason = '';
+                user.isBlocked = false;
+                await user.save({ validateBeforeSave: false });
+            } else {
+                const untilDate = user.suspendedUntil;
+                const formattedUntil = untilDate
+                    ? new Date(untilDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                    : 'further notice';
+                return res.status(403).json({
+                    message: `Account is temporarily suspended until ${formattedUntil}. Reason: ${user.suspensionReason || 'Administrative review'}`,
+                    status: 'suspended',
+                    suspendedUntil: user.suspendedUntil,
+                    reason: user.suspensionReason || 'Administrative review'
+                });
+            }
+        }
+
+        if (user.status === 'banned' || user.isBlocked) {
             return res.status(403).json({ 
-                message: 'Account blocked', 
-                reason: user.blockedReason 
+                message: `Account is permanently banned. Reason: ${user.banReason || user.blockedReason || 'Policy violation'}`,
+                status: 'banned',
+                reason: user.banReason || user.blockedReason || 'Policy violation'
             });
         }
 

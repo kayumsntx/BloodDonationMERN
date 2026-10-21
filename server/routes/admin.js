@@ -63,7 +63,7 @@ router.put('/users/:id/role', protect, authorizeRoles('super_admin'), async (req
 // Protected: Both 'super_admin' and 'admin'
 router.put('/users/:id/status', protect, authorizeRoles('super_admin', 'admin'), async (req, res) => {
     try {
-        const { status, reason } = req.body;
+        const { status, durationDays, suspendedUntil, reason } = req.body;
         const validStatuses = ['active', 'suspended', 'banned'];
 
         if (!validStatuses.includes(status)) {
@@ -83,20 +83,59 @@ router.put('/users/:id/status', protect, authorizeRoles('super_admin', 'admin'),
         }
 
         user.status = status;
-        user.isBlocked = (status === 'banned' || status === 'suspended');
-        if (reason) {
-            user.blockedReason = reason;
+
+        if (status === 'suspended') {
+            let untilDate = null;
+            if (suspendedUntil) {
+                untilDate = new Date(suspendedUntil);
+            } else {
+                const days = parseInt(durationDays, 10) || 7;
+                untilDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+            }
+            user.suspendedUntil = untilDate;
+            user.suspensionReason = (reason && reason.trim()) || 'Administrative suspension.';
+            user.suspendedAt = new Date();
+            user.suspendedBy = req.user._id;
+            user.isBlocked = true;
+            user.blockedReason = user.suspensionReason;
+        } else if (status === 'banned') {
+            user.suspendedUntil = null;
+            user.suspensionReason = '';
+            user.banReason = (reason && reason.trim()) || 'Permanent policy violation.';
+            user.bannedAt = new Date();
+            user.bannedBy = req.user._id;
+            user.isBlocked = true;
+            user.blockedReason = user.banReason;
+        } else if (status === 'active') {
+            user.suspendedUntil = null;
+            user.suspensionReason = '';
+            user.banReason = '';
+            user.isBlocked = false;
+            user.blockedReason = '';
         }
 
         await user.save();
 
+        const io = req.app.get('io');
+        if (io) {
+            const onlineUsers = await User.find({ isOnline: true }).select('-password');
+            io.emit('online-users', onlineUsers);
+        }
+
+        const actionText = status === 'suspended'
+            ? `suspended until ${user.suspendedUntil ? user.suspendedUntil.toLocaleDateString() : 'further notice'}`
+            : (status === 'banned' ? 'permanently banned' : 'reactivated');
+
         res.json({
-            message: `User ${user.name} is now ${status}.`,
+            message: `User ${user.name} has been ${actionText}.`,
             user: {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
                 status: user.status,
+                suspendedUntil: user.suspendedUntil,
+                suspensionReason: user.suspensionReason,
+                banReason: user.banReason,
                 isBlocked: user.isBlocked
             }
         });
