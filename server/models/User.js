@@ -137,10 +137,10 @@ const UserSchema = new mongoose.Schema({
         default: Date.now
     },
 
-    // ========== Admin ==========
+    // ========== Role & Permissions ==========
     role: {
         type: String,
-        enum: ['user', 'admin', 'moderator'],
+        enum: ['super_admin', 'admin', 'moderator', 'doctor', 'special_member', 'user'],
         default: 'user'
     },
     isBlocked: {

@@ -10,8 +10,8 @@ const {
 } = require('../utils/emailService');
 
 // ========== টোকেন জেনারেট ==========
-const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+const generateToken = (id, role = 'user') => {
+    return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
 // ========== Response ফরম্যাট ==========
@@ -73,7 +73,7 @@ router.post('/register', async (req, res) => {
         const verifyUrl = `${clientUrl}/verify-email/${verificationToken}`;
         await sendVerificationEmail(user.email, verifyUrl, user.name);
 
-        const token = generateToken(user._id);
+        const token = generateToken(user._id, user.role);
         res.status(201).json(userResponse(user, token));
     } catch (error) {
         console.error('Register error:', error);
@@ -106,7 +106,7 @@ router.post('/login', async (req, res) => {
         user.lastActive = new Date();
         await user.save({ validateBeforeSave: false });
 
-        const token = generateToken(user._id);
+        const token = generateToken(user._id, user.role);
         res.json(userResponse(user, token));
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -169,7 +169,7 @@ router.put('/reset-password/:token', async (req, res) => {
         user.resetPasswordExpire = undefined;
         await user.save();
 
-        const token = generateToken(user._id);
+        const token = generateToken(user._id, user.role);
         res.json({ message: 'Password reset successful', ...userResponse(user, token) });
     } catch (error) {
         res.status(500).json({ message: error.message });

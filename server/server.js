@@ -59,6 +59,7 @@ app.use('/api/badges', require('./routes/badges'));
 app.use('/api/leaderboard', require('./routes/leaderboard'));
 app.use('/api/sos', require('./routes/sos'));
 app.use('/api/groups', require('./routes/groups'));
+app.use('/api/posts', require('./routes/posts'));
 
 // ========== Health Check ==========
 app.get('/api/health', (req, res) => {

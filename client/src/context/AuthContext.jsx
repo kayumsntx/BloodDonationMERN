@@ -122,8 +122,15 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(updated));
     };
 
+    const isStaff = ['super_admin', 'admin', 'moderator'].includes(user?.role);
+    const isAdmin = ['super_admin', 'admin'].includes(user?.role);
+    const isSuperAdmin = user?.role === 'super_admin';
+    const isDoctor = user?.role === 'doctor';
+
     const value = {
         user, loading,
+        role: user?.role || 'user',
+        isStaff, isAdmin, isSuperAdmin, isDoctor,
         login, register, logout, updateUser,
         forgotPassword, resetPassword, verifyEmail, resendVerification
     };

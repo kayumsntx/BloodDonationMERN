@@ -8,6 +8,7 @@ const protect = async (req, res, next) => {
         try {
             token = req.headers.authorization.split(' ')[1];
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            req.jwtRole = decoded.role;
             req.user = await User.findById(decoded.id);
 
             if (!req.user) {
@@ -33,22 +34,38 @@ const protect = async (req, res, next) => {
     }
 };
 
-// Admin only
+// Flexible Role-Based Access Control Middleware (RBAC)
+const authorizeRoles = (...allowedRoles) => {
+    return (req, res, next) => {
+        // Checks role from JWT payload or loaded user document
+        const role = req.jwtRole || req.user?.role;
+        if (!role || !allowedRoles.includes(role)) {
+            return res.status(403).json({
+                message: `Access denied. Role (${role || 'None'}) is not authorized to access this route.`
+            });
+        }
+        next();
+    };
+};
+
+// Admin only (super_admin or admin)
 const adminOnly = (req, res, next) => {
-    if (req.user && req.user.role === 'admin') {
+    const role = req.jwtRole || req.user?.role;
+    if (role && (role === 'admin' || role === 'super_admin')) {
         next();
     } else {
         res.status(403).json({ message: 'Admin access only' });
     }
 };
 
-// Moderator or Admin
+// Moderator, Admin, or Super Admin
 const moderatorOnly = (req, res, next) => {
-    if (req.user && (req.user.role === 'admin' || req.user.role === 'moderator')) {
+    const role = req.jwtRole || req.user?.role;
+    if (role && ['super_admin', 'admin', 'moderator'].includes(role)) {
         next();
     } else {
         res.status(403).json({ message: 'Moderator access only' });
     }
 };
 
-module.exports = { protect, adminOnly, moderatorOnly };
+module.exports = { protect, authorizeRoles, adminOnly, moderatorOnly };

@@ -7,6 +7,8 @@ import Feed from '../Posts/Feed';
 import DonorList from '../Donors/DonorList';
 import ChatArea from '../Chat/ChatArea';
 import GroupChat from '../Chat/GroupChat';
+import BlogList from '../Blog/BlogList';
+import ApprovalDashboard from '../Blog/ApprovalDashboard';
 import Profile from '../Profile/Profile';
 import Footer from '../Common/Footer';
 import VerifyEmailBanner from '../Common/VerifyEmailBanner';
@@ -59,6 +61,8 @@ const Dashboard = () => {
                         <Route path="donors" element={<DonorList />} />
                         <Route path="chat" element={<ChatArea />} />
                         <Route path="groups" element={<GroupChat />} />
+                        <Route path="blog" element={<BlogList />} />
+                        <Route path="approvals" element={<ApprovalDashboard />} />
                         <Route path="profile" element={<Profile />} />
                         <Route path="leaderboard" element={<Leaderboard />} />
                     </Routes>

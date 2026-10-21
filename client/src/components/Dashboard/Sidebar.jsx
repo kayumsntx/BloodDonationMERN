@@ -5,10 +5,23 @@ import DevCredit from '../Common/DevCredit';
 import './Dashboard.css';
 
 const Sidebar = ({ onLogout, onlineCount, notificationCount }) => {
-    const { user } = useAuth();
+    const { user, isStaff } = useAuth();
 
     const avatarUrl = user?.profilePic || 
         `https://ui-avatars.com/api/?name=${user?.name}&background=dc3545&color=fff&size=100`;
+
+    const getRoleBadge = (role) => {
+        switch (role) {
+            case 'super_admin': return { label: 'Super Admin', color: '#f59e0b', icon: '👑' };
+            case 'admin': return { label: 'Admin', color: '#ef4444', icon: '🛡️' };
+            case 'moderator': return { label: 'Moderator', color: '#8b5cf6', icon: '⚖️' };
+            case 'doctor': return { label: 'Doctor', color: '#0ea5e9', icon: '🩺' };
+            case 'special_member': return { label: 'Special Member', color: '#10b981', icon: '⭐' };
+            default: return null;
+        }
+    };
+
+    const roleInfo = getRoleBadge(user?.role);
 
     return (
         <div style={{
@@ -35,12 +48,30 @@ const Sidebar = ({ onLogout, onlineCount, notificationCount }) => {
                     }}
                 />
                 <div style={{ fontWeight: 600, marginTop: 8 }}>{user?.name}</div>
-                <div style={{ fontSize: '0.8em', color: '#aaa' }}>
+                <div style={{ fontSize: '0.8em', color: '#aaa', marginTop: 2 }}>
                     🩸 {user?.bloodGroup} • {user?.district}
                 </div>
+                {roleInfo && (
+                    <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        marginTop: 6,
+                        padding: '2px 8px',
+                        borderRadius: 12,
+                        background: 'rgba(255,255,255,0.12)',
+                        border: `1px solid ${roleInfo.color}`,
+                        color: roleInfo.color,
+                        fontSize: '0.72rem',
+                        fontWeight: 700
+                    }}>
+                        <span>{roleInfo.icon}</span>
+                        <span>{roleInfo.label}</span>
+                    </div>
+                )}
             </div>
 
-            <nav style={{ flex: 1, padding: '15px 10px' }}>
+            <nav style={{ flex: 1, padding: '15px 10px', overflowY: 'auto' }}>
                 <SidebarLink to="/dashboard/feed" icon="📋" label="Blood Requests" />
                 <SidebarLink to="/dashboard/donors" icon="👥" label="Find Donors" />
                 <SidebarLink
@@ -50,6 +81,10 @@ const Sidebar = ({ onLogout, onlineCount, notificationCount }) => {
                     badge={onlineCount > 0 ? onlineCount : null}
                 />
                 <SidebarLink to="/dashboard/groups" icon="🩸" label="Group Chats" />
+                <SidebarLink to="/dashboard/blog" icon="📚" label="Articles & Blog" />
+                {isStaff && (
+                    <SidebarLink to="/dashboard/approvals" icon="🛡️" label="Approval Dashboard" />
+                )}
                 <SidebarLink to="/dashboard/leaderboard" icon="🏆" label="Leaderboard" />
                 <SidebarLink to="/dashboard/profile" icon="👤" label="My Profile" />
             </nav>
