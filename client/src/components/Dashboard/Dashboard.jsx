@@ -25,6 +25,7 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const [onlineUsers, setOnlineUsers] = useState([]);
     const [notifications, setNotifications] = useState([]);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         if (!socket) return;
@@ -50,12 +51,53 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard">
+            {/* Mobile Top Navbar (Visible < 768px for Google AdSense compliance) */}
+            <header className="mobile-topbar">
+                <button
+                    type="button"
+                    className="mobile-hamburger-btn"
+                    onClick={() => setMobileMenuOpen(prev => !prev)}
+                    aria-label="Toggle navigation menu"
+                >
+                    ☰
+                </button>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 800, fontSize: '1.05rem' }}>
+                    <span style={{ fontSize: '1.4rem' }}>🩸</span>
+                    <span>Blood Donation</span>
+                </div>
+
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    fontSize: '0.75rem',
+                    background: 'rgba(255,255,255,0.1)',
+                    padding: '4px 10px',
+                    borderRadius: 14,
+                    border: '1px solid rgba(255,255,255,0.2)'
+                }}>
+                    <span style={{ color: '#22c55e', fontSize: '0.65rem' }}>●</span>
+                    <span>{onlineUsers.length} Online</span>
+                </div>
+            </header>
+
+            {/* Mobile Drawer Overlay */}
+            <div
+                className={`mobile-overlay ${mobileMenuOpen ? 'active' : ''}`}
+                onClick={() => setMobileMenuOpen(false)}
+                aria-hidden="true"
+            />
+
+            {/* Sidebar Navigation */}
             <Sidebar
                 onLogout={handleLogout}
                 onlineCount={onlineUsers.length}
                 notificationCount={notifications.length}
+                isOpen={mobileMenuOpen}
+                onClose={() => setMobileMenuOpen(false)}
             />
-            <div className="main-content">
+            <main className="main-content">
                 <VerifyEmailBanner />
                 <DonationReminder />
                 <div className="content-body">
@@ -76,7 +118,7 @@ const Dashboard = () => {
                     </Routes>
                 </div>
                 <Footer />
-            </div>
+            </main>
             {/* 🆕 Floating SOS Button */}
             <SOSButton />
         </div>

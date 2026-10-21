@@ -59,3 +59,22 @@ a {
     font-size: 1.2em;
     color: var(--primary);
 }
+
+/* Mobile-First AdSense & Touch Friendly Helpers */
+.overflow-x-auto {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+    /* Touch target guidelines: minimum 44px-48px for interactive elements */
+    button, input[type="button"], input[type="submit"], .btn-action {
+        min-height: 44px;
+    }
+
+    /* Prevents unwanted iOS/mobile auto-zoom on focus while keeping smooth tap targets */
+    input, select, textarea {
+        font-size: 16px;
+    }
+}
+

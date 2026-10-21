@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import DevCredit from '../Common/DevCredit';
 import './Dashboard.css';
 
-const Sidebar = ({ onLogout, onlineCount, notificationCount }) => {
+const Sidebar = ({ onLogout, onlineCount, notificationCount, isOpen, onClose }) => {
     const { user, isStaff } = useAuth();
 
     const avatarUrl = user?.profilePic || 
@@ -24,31 +24,45 @@ const Sidebar = ({ onLogout, onlineCount, notificationCount }) => {
     const roleInfo = getRoleBadge(user?.role);
 
     return (
-        <div style={{
-            width: 260,
-            background: '#2c3e50',
-            color: 'white',
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100vh',
-            flexShrink: 0
-        }}>
-            <div style={{ padding: 20, textAlign: 'center', borderBottom: '1px solid #3d566e' }}>
-                <div style={{ fontSize: '2em' }}>🩸</div>
-                <h3 style={{ fontSize: '1.1em', marginTop: 5 }}>Blood Donation</h3>
+        <aside className={`dashboard-sidebar ${isOpen ? 'mobile-open' : ''}`}>
+            {/* Header with Title and Mobile Close button */}
+            <div style={{
+                padding: '16px 20px',
+                textAlign: 'center',
+                borderBottom: '1px solid #3d566e',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                position: 'relative'
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0 auto' }}>
+                    <span style={{ fontSize: '1.8rem' }}>🩸</span>
+                    <h3 style={{ fontSize: '1.15rem', margin: 0, fontWeight: 800, color: 'white' }}>Blood Donation</h3>
+                </div>
+
+                <button
+                    type="button"
+                    className="mobile-close-btn"
+                    onClick={onClose}
+                    aria-label="Close Navigation Menu"
+                    style={{ position: 'absolute', right: 10, top: 10 }}
+                >
+                    ✕
+                </button>
             </div>
 
-            <div style={{ padding: 20, textAlign: 'center', borderBottom: '1px solid #3d566e' }}>
+            {/* User Profile Card */}
+            <div style={{ padding: '16px 20px', textAlign: 'center', borderBottom: '1px solid #3d566e' }}>
                 <img
                     src={avatarUrl}
                     alt={user?.name}
                     style={{
-                        width: 70, height: 70, borderRadius: '50%',
+                        width: 64, height: 64, borderRadius: '50%',
                         border: '3px solid #dc3545', objectFit: 'cover'
                     }}
                 />
-                <div style={{ fontWeight: 600, marginTop: 8 }}>{user?.name}</div>
-                <div style={{ fontSize: '0.8em', color: '#aaa', marginTop: 2 }}>
+                <div style={{ fontWeight: 700, marginTop: 8, fontSize: '0.95rem' }}>{user?.name}</div>
+                <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: 2 }}>
                     🩸 {user?.bloodGroup} • {user?.district}
                 </div>
                 {roleInfo && (
@@ -57,8 +71,8 @@ const Sidebar = ({ onLogout, onlineCount, notificationCount }) => {
                         alignItems: 'center',
                         gap: 4,
                         marginTop: 6,
-                        padding: '2px 8px',
-                        borderRadius: 12,
+                        padding: '3px 10px',
+                        borderRadius: 14,
                         background: 'rgba(255,255,255,0.12)',
                         border: `1px solid ${roleInfo.color}`,
                         color: roleInfo.color,
@@ -71,19 +85,21 @@ const Sidebar = ({ onLogout, onlineCount, notificationCount }) => {
                 )}
             </div>
 
+            {/* Navigation Links */}
             <nav style={{ flex: 1, padding: '15px 10px', overflowY: 'auto' }}>
-                <SidebarLink to="/dashboard/feed" icon="📋" label="Blood Requests" />
-                <SidebarLink to="/dashboard/donors" icon="👥" label="Find Donors" />
+                <SidebarLink to="/dashboard/feed" icon="📋" label="Blood Requests" onClick={onClose} />
+                <SidebarLink to="/dashboard/donors" icon="👥" label="Find Donors" onClick={onClose} />
                 <SidebarLink
                     to="/dashboard/chat"
                     icon="💬"
                     label="Chat"
                     badge={onlineCount > 0 ? onlineCount : null}
+                    onClick={onClose}
                 />
-                <SidebarLink to="/dashboard/groups" icon="🩸" label="Group Chats" />
-                <SidebarLink to="/dashboard/blog" icon="📚" label="Articles & Blog" />
-                <SidebarLink to="/dashboard/leaderboard" icon="🏆" label="Leaderboard" />
-                <SidebarLink to="/dashboard/profile" icon="👤" label="My Profile" />
+                <SidebarLink to="/dashboard/groups" icon="🩸" label="Group Chats" onClick={onClose} />
+                <SidebarLink to="/dashboard/blog" icon="📚" label="Articles & Blog" onClick={onClose} />
+                <SidebarLink to="/dashboard/leaderboard" icon="🏆" label="Leaderboard" onClick={onClose} />
+                <SidebarLink to="/dashboard/profile" icon="👤" label="My Profile" onClick={onClose} />
 
                 {/* Staff / Admin Section */}
                 {isStaff && (
@@ -101,71 +117,95 @@ const Sidebar = ({ onLogout, onlineCount, notificationCount }) => {
 
                         {/* User Management: ONLY super_admin and admin */}
                         {(user?.role === 'super_admin' || user?.role === 'admin') && (
-                            <SidebarLink to="/dashboard/admin?tab=users" icon="👥" label="User Management" />
+                            <SidebarLink to="/dashboard/admin?tab=users" icon="👥" label="User Management" onClick={onClose} />
                         )}
 
                         {/* Post Management: super_admin, admin, and moderator */}
-                        <SidebarLink to="/dashboard/admin?tab=posts" icon="📝" label="Post Management" />
+                        <SidebarLink to="/dashboard/admin?tab=posts" icon="📝" label="Post Management" onClick={onClose} />
 
                         {/* Reported Articles: super_admin, admin, and moderator */}
-                        <SidebarLink to="/dashboard/admin?tab=reported_articles" icon="🚩" label="Reported Articles" />
+                        <SidebarLink to="/dashboard/admin?tab=reported_articles" icon="🚩" label="Reported Articles" onClick={onClose} />
 
                         {/* General Reports: super_admin, admin, and moderator */}
-                        <SidebarLink to="/dashboard/admin?tab=general_reports" icon="📋" label="General Reports" />
+                        <SidebarLink to="/dashboard/admin?tab=general_reports" icon="📋" label="General Reports" onClick={onClose} />
                     </div>
                 )}
 
                 {/* Support & Issue Reporting for all users */}
                 <div style={{ marginTop: 15, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                    <SidebarLink to="/dashboard/report-issue" icon="🛡️" label="Report an Issue" />
+                    <SidebarLink to="/dashboard/report-issue" icon="🛡️" label="Report an Issue" onClick={onClose} />
                 </div>
             </nav>
 
-            <div style={{ padding: '12px 15px', borderTop: '1px solid #3d566e' }}>
+            {/* Footer with touch-friendly 48px logout button */}
+            <div style={{ padding: '14px 15px', borderTop: '1px solid #3d566e' }}>
                 <button
-                    onClick={onLogout}
+                    onClick={() => {
+                        onClose && onClose();
+                        onLogout();
+                    }}
                     style={{
-                        width: '100%', padding: 10,
-                        background: '#e74c3c', color: 'white',
-                        border: 'none', borderRadius: 8,
-                        cursor: 'pointer', fontSize: '0.9em',
-                        marginBottom: 10
+                        width: '100%',
+                        minHeight: 48,
+                        padding: '12px 14px',
+                        background: '#e74c3c',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: 10,
+                        cursor: 'pointer',
+                        fontSize: '0.95rem',
+                        fontWeight: 700,
+                        marginBottom: 10,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                     }}
                 >
                     🚪 Logout
                 </button>
-                <div style={{ marginTop: 12 }}>
+                <div style={{ marginTop: 10 }}>
                     <DevCredit variant="sidebar" />
                 </div>
             </div>
-        </div>
+        </aside>
     );
 };
 
-const SidebarLink = ({ to, icon, label, badge }) => (
+const SidebarLink = ({ to, icon, label, badge, onClick }) => (
     <NavLink
         to={to}
+        onClick={onClick}
         style={({ isActive }) => ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '11px 15px',
+            padding: '12px 16px',
+            minHeight: '48px', // Minimum 48px tap target for Google AdSense compliance
             marginBottom: 5,
-            borderRadius: 8,
-            color: isActive ? 'white' : '#aaa',
+            borderRadius: 10,
+            color: isActive ? 'white' : '#cbd5e1',
             background: isActive ? '#dc3545' : 'transparent',
-            fontWeight: isActive ? 600 : 400,
-            transition: 'all 0.3s'
+            fontWeight: isActive ? 700 : 500,
+            textDecoration: 'none',
+            fontSize: '0.9rem',
+            transition: 'all 0.2s',
+            boxSizing: 'border-box'
         })}
     >
-        <span>{icon} {label}</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: '1.15rem' }}>{icon}</span>
+            <span>{label}</span>
+        </span>
         {badge && (
             <span style={{
                 background: '#e74c3c',
                 color: 'white',
-                padding: '1px 8px',
+                padding: '2px 8px',
                 borderRadius: 12,
-                fontSize: '0.7em'
+                fontSize: '0.72rem',
+                fontWeight: 700
             }}>{badge}</span>
         )}
     </NavLink>

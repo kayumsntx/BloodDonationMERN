@@ -329,3 +329,91 @@
     cursor: not-allowed;
     border-color: #e2e8f0;
 }
+
+/* ========================================================
+   Google AdSense Mobile-First & Responsive Layout Rules
+   ======================================================== */
+.admin-table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+    .admin-container {
+        padding: 0 4px 60px;
+    }
+
+    .admin-header-card {
+        padding: 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .admin-header-title h2 {
+        font-size: 1.25rem;
+    }
+
+    .admin-header-title p {
+        font-size: 0.85rem;
+    }
+
+    .admin-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .admin-stat-card {
+        padding: 14px;
+    }
+
+    .admin-nav-tabs {
+        gap: 6px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 6px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .admin-nav-tab {
+        padding: 12px 14px;
+        min-height: 48px; /* 48px tap target */
+        font-size: 0.85rem;
+    }
+
+    .admin-card-header {
+        padding: 16px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .admin-card-header > div:last-child {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 8px;
+    }
+
+    .admin-card-header input,
+    .admin-card-header select {
+        width: 100% !important;
+        min-height: 44px;
+        font-size: 0.9rem;
+    }
+
+    .btn-action {
+        min-height: 44px; /* Touch-friendly tap target */
+        padding: 8px 14px;
+        font-size: 0.85rem;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 12px 14px;
+        font-size: 0.82rem;
+        white-space: nowrap;
+    }
+}
+
